@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/* Custom Reading Theme Configurations */
+@theme {
+  --color-sepia-bg: #fdf6e3;
+  --color-sepia-text: #586e75;
+  --color-sepia-border: #eee8d5;
+}
+
+/* Base custom modifications for sepia reading theme */
+.sepia-mode {
+  background-color: #fdf6e3 !important;
+  color: #4f3b25 !important;
+}
+
+.sepia-mode .bg-white {
+  background-color: #f5eccd !important;
+}
+
+.sepia-mode .bg-slate-50 {
+  background-color: #efe5c2 !important;
+}
+
+.sepia-mode .border-slate-200 {
+  border-color: #e5d8b2 !important;
+}
+
+.sepia-mode p {
+  color: #4f3b25 !important;
+}
+
+.sepia-mode .text-slate-900 {
+  color: #3f2f1e !important;
+}
+
+.sepia-mode .text-slate-700 {
+  color: #4f3b25 !important;
+}
+
+.sepia-mode .text-slate-800 {
+  color: #3f2f1e !important;
+}
+
+/* Premium Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-zoomIn {
+  animation: zoomIn 0.15s ease-out forwards;
+}
