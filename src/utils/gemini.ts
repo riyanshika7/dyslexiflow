@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export interface SimplifiedResponse {
   simplifiedText: string;
@@ -11,11 +11,11 @@ export async function simplifyText(apiKey: string, text: string): Promise<Simpli
     throw new Error('Google Gemini API Key is missing. Please set it in Settings.');
   }
 
-  // Initialize the SDK with the provided API key
-  const ai = new GoogleGenAI({ apiKey });
+  // Initialize the SDK using GoogleGenerativeAI from @google/generative-ai
+  const genAI = new GoogleGenerativeAI(apiKey);
   
   // Use Gemini 1.5 Flash for sub-second latency
-  const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const prompt = `
 You are an expert educational cognitive specialist assisting K-12 students with dyslexia and ADHD.
@@ -65,8 +65,9 @@ export async function evaluateSocraticAnswer(
     throw new Error('Google Gemini API Key is missing.');
   }
 
-  const ai = new GoogleGenAI({ apiKey });
-  const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  // Initialize the SDK using GoogleGenerativeAI from @google/generative-ai
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const prompt = `
 You are an encouraging educational coach. Evaluate a student's answer to a Socratic question based on a paragraph of text they just read.
