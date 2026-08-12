@@ -1,91 +1,121 @@
-import { GoogleGenAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import type { AssistPayload } from "../types";
 
-export interface SimplifiedResponse {
-  simplifiedText: string;
-  syllables: { word: string; breakdown: string }[];
-  socraticPrompt: string;
+/**
+ * Clean Utility:
+ * Safely removes markdown code block fences (e.g. ```json ... ```) 
+ * if Gemini includes them in the raw string output.
+ */
+function cleanJsonResponse(text: string): string {
+  return text
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
 }
 
-export async function simplifyText(apiKey: string, text: string): Promise<SimplifiedResponse> {
-  if (!apiKey) {
-    throw new Error('Google Gemini API Key is missing. Please set it in Settings.');
+/**
+ * Gemini Cognitive Assistance Engine
+ * 
+ * WHAT IT DOES:
+ * Takes a paragraph that a reader is struggling with and uses Gemini Flash
+ * to scaffold learning for neurodivergent students (ADHD/Dyslexia).
+ * 
+ * HOW IT WORKS:
+ * 1. Sends the text to Gemini with a strict JSON system prompt.
+ * 2. Asks for a Plain English translation (reduces syntactic fatigue).
+ * 3. Identifies complex words (>3 syllables) and breaks them phonetically.
+ * 4. Asks a Socratic comprehension check question to encourage active recall.
+ */
+export async function getCognitiveAssistance(
+  paragraphText: string,
+  apiKey: string
+): Promise<AssistPayload> {
+  if (!apiKey || apiKey.trim() === "") {
+    throw new Error("Missing Gemini API Key. Please configure it in your settings or .env file.");
   }
 
-  // Initialize the SDK with the provided API key
-  const ai = new GoogleGenAI({ apiKey });
-  
-  // Use Gemini 1.5 Flash for sub-second latency
-  const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  // Initialize the Gemini SDK with the student's or env API key
+  const genAI = new GoogleGenerativeAI(apiKey.trim());
+
+  // Using low-latency Flash model optimized for quick UI feedback
+  const model = genAI.getGenerativeModel({
+    model: "gemini-3.6-flash",
+    generationConfig: {
+      responseMimeType: "application/json", // Enforce pure JSON response
+    },
+  });
 
   const prompt = `
-You are an expert educational cognitive specialist assisting K-12 students with dyslexia and ADHD.
-Analyze the following text paragraph and respond with a JSON object.
-
-Text to analyze:
-"${text}"
-
-Your response must strictly match the following JSON schema:
+You are a cognitive reading assistant for K-12 students with ADHD and dyslexia.
+Analyze the following paragraph and provide structural reading assistance in STRICT JSON format matching this structure:
 {
-  "simplifiedText": "The text re-written in simple, direct, active-voice plain English. Avoid complex idioms, long compound sentences, or dense jargon. Keep it to the same length or shorter.",
-  "syllables": [
-    { "word": "original complex word", "breakdown": "the-word-split-into-syllables-separated-by-hyphens" }
+  "simplifiedText": "The paragraph rewritten in plain English (retaining original meaning but simplifying syntax).",
+  "syllabifiedWords": [
+    { "original": "complexWord", "syllables": "com-plex-word" }
   ],
-  "socraticPrompt": "A single, encouraging, Socratic open-ended question that prompts the student to reflect on or demonstrate comprehension of the core concept in the paragraph. Do not quiz on trivial details."
+  "socraticQuestion": "A quick Socratic comprehension check question to verify retention."
 }
 
-Notes:
-1. Provide exactly 2 or 3 words in the "syllables" array. Choose the most complex or long words.
-2. Return ONLY the JSON object. Do not include markdown code block styling like \`\`\`json.
+Rules:
+1. "syllabifiedWords": Select 2-4 words with high structural complexity (>3 syllables) and break them into phonetic syllables (e.g. "communication" -> "com-mu-ni-ca-tion").
+2. DO NOT return markdown wrappers (no \`\`\`json). Return raw JSON only.
+
+Paragraph:
+"${paragraphText}"
 `;
 
   try {
     const result = await model.generateContent(prompt);
-    const responseText = result.response.text().trim();
-    
-    // Clean up potential markdown formatting if the model didn't follow the instructions exactly
-    const cleanJSON = responseText
-      .replace(/^```json/i, '')
-      .replace(/```$/, '')
-      .trim();
+    const rawText = result.response.text();
+    const cleanedText = cleanJsonResponse(rawText);
 
-    return JSON.parse(cleanJSON) as SimplifiedResponse;
+    // Parse into our strict TypeScript AssistPayload contract
+    const parsedData: AssistPayload = JSON.parse(cleanedText);
+    return parsedData;
   } catch (error) {
-    console.error('Error calling Gemini API:', error);
-    throw new Error(error instanceof Error ? error.message : 'Failed to connect to Gemini API.');
+    console.error("Error generating Gemini cognitive assistance:", error);
+    throw error;
   }
 }
 
+/**
+ * Socratic Answer Evaluator
+ * 
+ * WHAT IT DOES:
+ * Evaluates the student's answer to the Socratic question and returns short, 
+ * encouraging feedback.
+ * 
+ * CONSTRAINT:
+ * Strictly limited to 2 sentences to prevent cognitive overload.
+ */
 export async function evaluateSocraticAnswer(
-  apiKey: string,
-  question: string,
   originalText: string,
-  userAnswer: string
+  question: string,
+  studentAnswer: string,
+  apiKey: string
 ): Promise<string> {
-  if (!apiKey) {
-    throw new Error('Google Gemini API Key is missing.');
+  if (!apiKey || apiKey.trim() === "") {
+    return "Great effort! Keep reading closely.";
   }
 
-  const ai = new GoogleGenAI({ apiKey });
-  const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const genAI = new GoogleGenerativeAI(apiKey.trim());
+  const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
 
   const prompt = `
-You are an encouraging educational coach. Evaluate a student's answer to a Socratic question based on a paragraph of text they just read.
-Be supportive, positive, and offer constructive feedback in 2-3 short sentences. Never be harsh or discouraging. 
-If they did well, validate why they are correct. If they are partially correct or incorrect, guide them back to the key details.
-
-Details:
-Paragraph: "${originalText}"
+You are an encouraging tutor checking a K-12 student's reading comprehension.
+Original Text: "${originalText}"
 Socratic Question: "${question}"
-Student's Answer: "${userAnswer}"
+Student's Answer: "${studentAnswer}"
 
-Write your brief feedback response in plain, direct text (no markdown formatting).
+Provide encouraging, constructive feedback based on their answer.
+CRITICAL CONSTRAINT: Your entire response MUST BE EXACTLY 2 SENTENCES long. No more, no less.
 `;
 
   try {
     const result = await model.generateContent(prompt);
     return result.response.text().trim();
   } catch (error) {
-    console.error('Error calling Gemini API for evaluation:', error);
-    throw new Error('Failed to connect to Gemini API for evaluation.');
+    console.error("Error evaluating Socratic answer:", error);
+    return "Great effort! Keep reading closely to catch every detail.";
   }
 }

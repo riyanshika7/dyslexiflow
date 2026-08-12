@@ -141,7 +141,7 @@ stateDiagram-v2
 ## 5. Gemini JSON API Schemas
 
 ### 5.1 Text Simplification Prompt (`simplifyText`)
-* **Endpoint**: `gemini-1.5-flash`
+* **Endpoint**: `gemini-3.6-flash`  <!-- It worked on gemini-3-6-flash -->
 * **Temperature**: `0.3` (low temperature to ensure structural compliance and JSON accuracy)
 * **Response Requirements**: Must return a parseable JSON object with no markdown wrappers:
 ```json
@@ -156,7 +156,7 @@ stateDiagram-v2
 ```
 
 ### 5.2 Socratic Evaluator Prompt (`evaluateSocraticAnswer`)
-* **Endpoint**: `gemini-1.5-flash`
+* **Endpoint**: `gemini-3.6-flash`  <!-- it worked on gemini-3.6-flash -->
 * **Response Requirements**: Return direct plain text (no markdown, no headers):
 * **Prompt Instructions**: *"Evaluate the student's answer to the Socratic question. Provide 2-3 encouraging sentences validating their correct observations or gently pointing them back to key details."*
 
