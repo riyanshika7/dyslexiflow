@@ -1,7 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Sparkles, Send, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
-import { getCognitiveAssistance, evaluateSocraticAnswer } from '../utils/gemini';
-import type { AssistPayload } from '../types';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Volume2,
+  VolumeX,
+  Sparkles,
+  Send,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+import {
+  getCognitiveAssistance,
+  evaluateSocraticAnswer,
+} from "../utils/gemini";
+import type { AssistPayload } from "../types";
 
 interface AgentPanelProps {
   activeParagraphText: string | null;
@@ -19,21 +29,23 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [aiData, setAiData] = useState<AssistPayload | null>(null);
-  
+
   // Socratic Q&A States
-  const [userAnswer, setUserAnswer] = useState<string>('');
+  const [userAnswer, setUserAnswer] = useState<string>("");
   const [feedbackLoading, setFeedbackLoading] = useState<boolean>(false);
   const [aiFeedback, setAiFeedback] = useState<string | null>(null);
 
   // Speech states
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
-  const [speakingType, setSpeakingType] = useState<'simplified' | 'original' | null>(null);
+  const [speakingType, setSpeakingType] = useState<
+    "simplified" | "original" | null
+  >(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   // Initialize Speech Synthesis
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
       synthRef.current = window.speechSynthesis;
     }
     return () => {
@@ -52,7 +64,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
   useEffect(() => {
     if (aiData && activeParagraphText !== struggleParagraphText) {
       // Keep it, but reset feedback if user focused a new paragraph
-      setUserAnswer('');
+      setUserAnswer("");
       setAiFeedback(null);
     }
   }, [activeParagraphText]);
@@ -61,7 +73,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
     setLoading(true);
     setError(null);
     setAiFeedback(null);
-    setUserAnswer('');
+    setUserAnswer("");
     stopSpeech();
 
     try {
@@ -69,7 +81,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
       const data = await getCognitiveAssistance(text, apiKey);
       setAiData(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.');
+      setError(err instanceof Error ? err.message : "Something went wrong.");
       setAiData(null);
     } finally {
       setLoading(false);
@@ -77,7 +89,10 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
   };
 
   // Speaks paragraph text (simplified or original)
-  const handleSpeak = (textToSpeak: string, type: 'simplified' | 'original') => {
+  const handleSpeak = (
+    textToSpeak: string,
+    type: "simplified" | "original",
+  ) => {
     if (!synthRef.current) return;
 
     if (isSpeaking && speakingType === type) {
@@ -89,9 +104,9 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
     synthRef.current.cancel();
 
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    
+
     // Set parameters optimized for neurodivergent auditory comprehension
-    utterance.rate = type === 'simplified' ? 0.9 : 0.85; // Slower pace for original complex paragraphs
+    utterance.rate = type === "simplified" ? 0.9 : 0.85; // Slower pace for original complex paragraphs
     utterance.pitch = 1.0;
 
     utterance.onend = () => {
@@ -112,16 +127,16 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
   // Speaks an individual syllable word slowly
   const speakSyllable = (word: string) => {
     if (!synthRef.current) return;
-    
+
     // Clear standard read-aloud queues immediately
     synthRef.current.cancel();
     setIsSpeaking(false);
     setSpeakingType(null);
-    
+
     const utterance = new SpeechSynthesisUtterance(word);
-    
+
     // Slower phonetic pronunciation rate for sound-to-letter mappings
-    utterance.rate = 0.7; 
+    utterance.rate = 0.7;
     utterance.pitch = 1.0;
 
     synthRef.current.speak(utterance);
@@ -137,7 +152,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
 
   const handleAnswerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userAnswer.trim() || !aiData || !apiKey || !struggleParagraphText) return;
+    if (!userAnswer.trim() || !aiData || !apiKey || !struggleParagraphText)
+      return;
 
     setFeedbackLoading(true);
     setAiFeedback(null);
@@ -147,11 +163,11 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
         struggleParagraphText,
         aiData.socraticQuestion,
         userAnswer,
-        apiKey
+        apiKey,
       );
       setAiFeedback(feedback);
     } catch (err) {
-      setAiFeedback('Failed to evaluate answer. Please try again.');
+      setAiFeedback("Failed to evaluate answer. Please try again.");
     } finally {
       setFeedbackLoading(false);
     }
@@ -162,9 +178,12 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
     return (
       <div className="flex flex-col items-center justify-center h-full text-slate-400 text-center p-6 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/10">
         <AlertCircle className="w-12 h-12 text-slate-300 mb-3" />
-        <h3 className="font-semibold text-slate-700 dark:text-slate-300 text-base mb-1">API Key Needed</h3>
+        <h3 className="font-semibold text-slate-700 dark:text-slate-300 text-base mb-1">
+          API Key Needed
+        </h3>
         <p className="text-sm max-w-xs">
-          Open settings at the top right to configure your Google Gemini API Key to enable the AI Agent.
+          Open settings at the top right to configure your Google Gemini API Key
+          to enable the AI Agent.
         </p>
       </div>
     );
@@ -176,25 +195,53 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
       <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-indigo-500 fill-indigo-500/20" />
-          <span className="font-semibold text-slate-700 dark:text-slate-200 text-sm">Cognitive Assistant Agent</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-200 text-sm">
+            Cognitive Assistant Agent
+          </span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="relative flex h-2 w-2">
-            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${loading ? 'bg-indigo-400' : 'bg-green-400'}`}></span>
-            <span className={`relative inline-flex rounded-full h-2 w-2 ${loading ? 'bg-indigo-500' : 'bg-green-500'}`}></span>
+            <span
+              className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${loading ? "bg-indigo-400" : "bg-green-400"}`}
+            ></span>
+            <span
+              className={`relative inline-flex rounded-full h-2 w-2 ${loading ? "bg-indigo-500" : "bg-green-500"}`}
+            ></span>
           </span>
           <span className="text-xs text-slate-500 dark:text-slate-400">
-            {loading ? 'Analyzing...' : 'Watching focus...'}
+            {loading ? "Analyzing..." : "Watching focus..."}
           </span>
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
         {loading && (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-            <p className="text-sm animate-pulse">Running diagnostic cognitive checks...</p>
+          <div className="space-y-4 animate-fadeIn">
+            {/* Fake "Simplified Language" card skeleton */}
+            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm space-y-3">
+              <div className="h-3 w-32 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+              <div className="space-y-2">
+                <div className="h-3 w-full bg-slate-100 dark:bg-slate-900 rounded animate-pulse" />
+                <div className="h-3 w-full bg-slate-100 dark:bg-slate-900 rounded animate-pulse" />
+                <div className="h-3 w-2/3 bg-slate-100 dark:bg-slate-900 rounded animate-pulse" />
+              </div>
+            </div>
+
+            {/* Fake syllable card skeletons */}
+            <div className="grid grid-cols-2 gap-2">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 h-14 animate-pulse"
+                />
+              ))}
+            </div>
+
+            <p className="text-center text-s text-slate-400 dark:text-slate-500">
+              Analyzing paragraph and preparing reading aids...
+            </p>
           </div>
         )}
 
@@ -209,11 +256,32 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
         )}
 
         {!loading && !error && !aiData && (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-400 text-center space-y-2 h-full">
-            <HelpCircle className="w-12 h-12 stroke-1 text-slate-300 dark:text-slate-700" />
-            <p className="text-sm max-w-[240px]">
-              Hover over a paragraph and keep your mouse there for {dwellTime || 4} seconds. The agent will automatically diagnose your reading.
-            </p>
+          <div className="flex flex-col items-center justify-center py-10 text-center space-y-5 h-full px-4">
+            {/* Mini visual: a paragraph outline being "watched" */}
+            <div className="relative w-40">
+              <div className="space-y-1.5 opacity-40">
+                <div className="h-2 w-full bg-slate-300 dark:bg-slate-700 rounded-full" />
+                <div className="h-2 w-full bg-slate-300 dark:bg-slate-700 rounded-full" />
+                <div className="h-2 w-3/4 bg-slate-300 dark:bg-slate-700 rounded-full" />
+              </div>
+              <span className="absolute -right-1 -top-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500" />
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                Watching for reading struggles
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 max-w-[220px] mx-auto">
+                Hold your cursor on a paragraph for{" "}
+                <span className="font-semibold text-indigo-500 dark:text-indigo-400">
+                  {dwellTime || 4}s
+                </span>{" "}
+                and I'll step in with help.
+              </p>
+            </div>
           </div>
         )}
 
@@ -227,27 +295,39 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
                 </span>
                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/60 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800/40">
                   <button
-                    onClick={() => handleSpeak(struggleParagraphText || '', 'original')}
+                    onClick={() =>
+                      handleSpeak(struggleParagraphText || "", "original")
+                    }
                     className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md transition cursor-pointer ${
-                      isSpeaking && speakingType === 'original'
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      isSpeaking && speakingType === "original"
+                        ? "bg-indigo-600 text-white shadow-sm"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                     }`}
                     title="Speak Original Paragraph"
                   >
-                    {isSpeaking && speakingType === 'original' ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                    {isSpeaking && speakingType === "original" ? (
+                      <VolumeX className="w-3 h-3" />
+                    ) : (
+                      <Volume2 className="w-3 h-3" />
+                    )}
                     <span>Original</span>
                   </button>
                   <button
-                    onClick={() => handleSpeak(aiData.simplifiedText, 'simplified')}
+                    onClick={() =>
+                      handleSpeak(aiData.simplifiedText, "simplified")
+                    }
                     className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md transition cursor-pointer ${
-                      isSpeaking && speakingType === 'simplified'
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      isSpeaking && speakingType === "simplified"
+                        ? "bg-indigo-600 text-white shadow-sm"
+                        : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                     }`}
                     title="Speak Simplified Text"
                   >
-                    {isSpeaking && speakingType === 'simplified' ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                    {isSpeaking && speakingType === "simplified" ? (
+                      <VolumeX className="w-3 h-3" />
+                    ) : (
+                      <Volume2 className="w-3 h-3" />
+                    )}
                     <span>Simplified</span>
                   </button>
                 </div>
@@ -268,15 +348,20 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
                     <div
                       key={index}
                       onClick={() => speakSyllable(s.original)}
-                      className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 hover:border-indigo-400 hover:shadow-sm cursor-pointer transition flex items-center justify-between group"
+                      className="relative bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm cursor-pointer transition-all duration-150 flex items-center justify-between group overflow-hidden"
                     >
-                      <div>
-                        <p className="text-xs text-slate-400 font-semibold">{s.original}</p>
+                      <div className="absolute inset-0 bg-indigo-500/0 group-hover:bg-indigo-500/[0.03] dark:group-hover:bg-indigo-400/[0.05] transition-colors duration-150" />
+                      <div className="relative">
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                          {s.original}
+                        </p>
                         <p className="font-semibold text-indigo-600 dark:text-indigo-400 tracking-wide text-sm mt-0.5">
                           {s.syllables}
                         </p>
                       </div>
-                      <Volume2 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-500 transition" />
+                      <div className="relative bg-slate-50 dark:bg-slate-900 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/50 rounded-full p-1.5 transition-colors duration-150">
+                        <Volume2 className="w-3 h-3 text-slate-400 group-hover:text-indigo-500 transition-colors duration-150" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -326,7 +411,9 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
                 <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/15 border border-indigo-100 dark:border-indigo-900/30 rounded-md flex gap-2.5 mt-2 animate-fadeIn">
                   <CheckCircle2 className="w-4 h-4 text-indigo-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">Feedback</p>
+                    <p className="text-xs font-semibold text-indigo-800 dark:text-indigo-300">
+                      Feedback
+                    </p>
                     <p className="text-xs text-indigo-700 dark:text-indigo-400 leading-relaxed mt-0.5">
                       {aiFeedback}
                     </p>
