@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, FileText, Upload, Sun, Moon, Sparkles, BookOpen, Plus, Type, ZoomIn, ZoomOut } from 'lucide-react';
+import { Settings, FileText, Upload, Sparkles, BookOpen, Plus, Type, ZoomIn, ZoomOut } from 'lucide-react';
 import { Reader } from './components/Reader';
 import { AgentPanel } from './components/AgentPanel';
 import { SettingsModal } from './components/SettingsModal';
@@ -17,6 +17,11 @@ Black holes are regions of spacetime where gravity is so strong that nothing, no
 A major driver of this change was the development of the steam engine. Originally created to pump water out of coal mines, it was refined by James Watt to provide continuous rotative motion. This allowed factories to be built away from rivers, completely transforming the geography of manufacturing and urban development.
 
 The social impacts were profound. While it led to an unprecedented rise in the rate of population growth and average income, it also created challenging working conditions. Young children worked long hours in textile mills, and crowded tenement housing in industrial cities led to public health crises before labor laws were established.`,
+  biology: `Photosynthesis is a chemical process that occurs in plants, algae, and some bacteria. It converts light energy, usually from the Sun, into chemical energy that can be later released to fuel the organisms' activities. This chemical energy is stored in carbohydrate molecules, such as sugars, which are synthesized from carbon dioxide and water.
+
+Chloroplasts are specialized organelles found in plant and algal cells. These organelles conduct photosynthesis. They contain a high concentration of chlorophyll, a green pigment that absorbs light energy. During the light-dependent reactions, water is split into oxygen and hydrogen ions, releasing oxygen gas as a byproduct.
+
+Carbon fixation is the process by which inorganic carbon dioxide is converted into organic compounds by living organisms. The Calvin cycle, which takes place in the stroma of the chloroplast, is the primary pathway for carbon fixation in plants. This cycle uses the chemical energy stored during the light reactions to synthesize sugars from carbon dioxide.`,
 };
 
 const DEFAULT_CONFIG: ReaderConfig = {
@@ -25,7 +30,6 @@ const DEFAULT_CONFIG: ReaderConfig = {
   wordSpacing: 0.16,
   lineHeight: 1.8,
   fontFamily: 'OpenDyslexic',
-  theme: 'sepia',
   dwellTime: 4,
   rulerEnabled: true,
   rulerColor: 'rgba(253, 224, 71, 1)',
@@ -60,18 +64,14 @@ export default function App() {
     localStorage.setItem('dyslexi_flow_config', JSON.stringify(config));
   }, [config]);
 
-  // Adjust HTML Root style theme tags when configuration theme changes
+  // Adjust HTML Root style theme tags to always keep dark mode
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove('dark', 'sepia-mode');
-    if (config.theme === 'dark') {
-      root.classList.add('dark');
-    } else if (config.theme === 'sepia') {
-      root.classList.add('sepia-mode');
-    }
-  }, [config.theme]);
+    root.classList.remove('sepia-mode');
+    root.classList.add('dark');
+  }, []);
 
-  // Handle file uploads (.txt) (Day 3 Riyanshika Task)
+  // Handle file uploads (.txt)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -102,7 +102,7 @@ export default function App() {
     setStruggleText(null);
   };
 
-  const loadSample = (type: 'space' | 'history') => {
+  const loadSample = (type: 'space' | 'history' | 'biology') => {
     setText(SAMPLES[type]);
     resetReadingState();
   };
@@ -144,6 +144,12 @@ export default function App() {
               Industrial Revolution
             </button>
             <button
+              onClick={() => loadSample('biology')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+            >
+              Photosynthesis
+            </button>
+            <button
               onClick={() => setCustomTextOpen(true)}
               className="px-2.5 py-1 text-xs font-semibold rounded-md bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1 transition cursor-pointer"
             >
@@ -156,31 +162,6 @@ export default function App() {
             <Upload className="w-4 h-4" />
             <input type="file" accept=".txt" onChange={handleFileUpload} className="hidden" />
           </label>
-
-          {/* Theme Selector */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200/50 dark:border-slate-800">
-            <button
-              onClick={() => updateConfigField('theme', 'light')}
-              className={`p-1.5 rounded-md transition cursor-pointer ${config.theme === 'light' ? 'bg-white text-yellow-500 shadow-sm' : 'text-slate-500'}`}
-              title="Light Mode"
-            >
-              <Sun className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => updateConfigField('theme', 'sepia')}
-              className={`p-1.5 rounded-md transition cursor-pointer ${config.theme === 'sepia' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-500'}`}
-              title="Sepia Mode (Recommended for Reading)"
-            >
-              <span className="text-[10px] font-bold block leading-none px-0.5">Aa</span>
-            </button>
-            <button
-              onClick={() => updateConfigField('theme', 'dark')}
-              className={`p-1.5 rounded-md transition cursor-pointer ${config.theme === 'dark' ? 'bg-slate-800 text-indigo-400 shadow-sm' : 'text-slate-500'}`}
-              title="Dark Mode"
-            >
-              <Moon className="w-3.5 h-3.5" />
-            </button>
-          </div>
 
           {/* Settings cog */}
           <button
