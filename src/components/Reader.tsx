@@ -32,7 +32,8 @@ export const Reader: React.FC<ReaderProps> = ({
 }) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [rulerTop, setRulerTop] = useState<number>(0);
-  const [isMouseOverReader, setIsMouseOverReader] = useState<boolean>(false);
+  const [isMouseOverReader, setIsMouseOverReader] =
+    useState<boolean>(false);
 
   const readerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -61,7 +62,11 @@ export const Reader: React.FC<ReaderProps> = ({
     ) {
       timerRef.current = setTimeout(() => {
         triggeredIdxRef.current = activeIdx;
-        onStruggleDetected(paragraphs[activeIdx], activeIdx);
+
+        onStruggleDetected(
+          paragraphs[activeIdx],
+          activeIdx
+        );
       }, dwellTime * 1000);
     }
 
@@ -74,23 +79,34 @@ export const Reader: React.FC<ReaderProps> = ({
   }, [activeIdx, dwellTime, text]);
 
   // Handle mouse movement for the Dyslexia Ruler
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = (
+    e: React.MouseEvent<HTMLDivElement>
+  ) => {
     if (!rulerEnabled || !readerRef.current) return;
 
     const rect = readerRef.current.getBoundingClientRect();
+
     const relativeY = e.clientY - rect.top;
 
     // Keep the ruler inside the reader container
     const minY = rulerHeight / 2;
     const maxY = rect.height - rulerHeight / 2;
-    const clampedY = Math.max(minY, Math.min(relativeY, maxY));
+
+    const clampedY = Math.max(
+      minY,
+      Math.min(relativeY, maxY)
+    );
 
     setRulerTop(clampedY);
   };
 
   // Handle paragraph focus
-  const handleParagraphEnter = (index: number, pText: string) => {
-    // Reset the struggle trigger when moving to a different paragraph
+  const handleParagraphEnter = (
+    index: number,
+    pText: string
+  ) => {
+    // Reset the struggle trigger when moving
+    // to a different paragraph
     if (triggeredIdxRef.current !== index) {
       triggeredIdxRef.current = null;
     }
@@ -107,7 +123,10 @@ export const Reader: React.FC<ReaderProps> = ({
 
   // Reader typography settings
   const readerStyles: React.CSSProperties = {
-    fontFamily: fontFamily === 'OpenDyslexic' ? '"OpenDyslexic", sans-serif' : fontFamily,
+    fontFamily:
+      fontFamily === 'OpenDyslexic'
+        ? '"OpenDyslexic", sans-serif'
+        : fontFamily,
     fontSize: `${fontSize}px`,
     lineHeight: lineHeight,
     wordSpacing: `${wordSpacing}em`,
@@ -144,14 +163,25 @@ export const Reader: React.FC<ReaderProps> = ({
       {/* Empty reader state */}
       {paragraphs.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12 text-center">
-          <Type size={48} className="mb-4 stroke-1 text-slate-300" />
-          <p className="text-lg">No text loaded</p>
-          <p className="text-sm">Please paste an article or upload a file to start reading.</p>
+          <Type
+            size={48}
+            className="mb-4 stroke-1 text-slate-300"
+          />
+
+          <p className="text-lg">
+            No text loaded
+          </p>
+
+          <p className="text-sm">
+            Please paste an article or upload a file to
+            start reading.
+          </p>
         </div>
       ) : (
         paragraphs.map((pText, idx) => {
           const isActive = activeIdx === idx;
-          const isDimmed = activeIdx !== null && !isActive;
+          const isDimmed =
+            activeIdx !== null && !isActive;
 
           return (
             <p
@@ -160,10 +190,18 @@ export const Reader: React.FC<ReaderProps> = ({
                 isActive
                   ? 'border-indigo-500 bg-indigo-50/30 dark:bg-indigo-950/20 text-slate-900 dark:text-slate-50 shadow-sm'
                   : 'border-transparent text-slate-700 dark:text-slate-300'
-              } ${isDimmed ? 'opacity-25 filter blur-[0.5px]' : 'opacity-100'}`}
-              onMouseEnter={() => handleParagraphEnter(idx, pText)}
+              } ${
+                isDimmed
+                  ? 'opacity-25 filter blur-[0.5px]'
+                  : 'opacity-100'
+              }`}
+              onMouseEnter={() =>
+                handleParagraphEnter(idx, pText)
+              }
               style={{
-                transform: isActive ? 'scale(1.01)' : 'scale(1)',
+                transform: isActive
+                  ? 'scale(1.01)'
+                  : 'scale(1)',
               }}
             >
               {pText}
