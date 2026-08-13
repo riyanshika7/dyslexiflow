@@ -2,6 +2,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { AssistPayload } from "../types";
 
 /**
+ * Standardized model string matching the project spec and README.
+ */
+const GEMINI_MODEL = "gemini-3.6-flash";
+
+/**
  * Clean Utility:
  * Safely removes markdown code block fences (e.g. ```json ... ```) 
  * if Gemini includes them in the raw string output.
@@ -14,17 +19,32 @@ function cleanJsonResponse(text: string): string {
 }
 
 /**
+ * Helper to enforce the 2-sentence constraint programmatically.
+ */
+function limitToTwoSentences(text: string): string {
+  const trimmed = text.trim();
+  // Match sentence endings (. ! ?) while preserving text structure
+  const sentences = trimmed.match(/[^.!?]+[.!?]+/g);
+
+  if (!sentences || sentences.length <= 2) {
+    return trimmed;
+  }
+
+  return sentences.slice(0, 2).join(" ").trim();
+}
+
+/**
  * Helper to identify if a string is gibberish or non-linguistic noise.
  */
 function isLikelyGibberish(text: string): boolean {
   const trimmed = text.trim().toLowerCase();
   
-  // Single characters, punctuation only, or common non-answers
-  if (trimmed.length <= 1 || /^[^a-zA-Z0-0]+$/.test(trimmed)) {
+  // Single characters, punctuation only, or non-alphanumeric strings
+  if (trimmed.length <= 1 || /^[^a-zA-Z0-9]+$/.test(trimmed)) {
     return true;
   }
 
-  // Keyboard smashes / repeating consecutive characters (e.g., "asdfgh", "aaaaa")
+  // Keyboard smashes / repeating consecutive characters (e.g., "aaaaa")
   if (/(.)\1{3,}/.test(trimmed)) {
     return true;
   }
@@ -34,16 +54,6 @@ function isLikelyGibberish(text: string): boolean {
 
 /**
  * Gemini Cognitive Assistance Engine
- * 
- * WHAT IT DOES:
- * Takes a paragraph that a reader is struggling with and uses Gemini Flash
- * to scaffold learning for neurodivergent students (ADHD/Dyslexia).
- * 
- * HOW IT WORKS:
- * 1. Sends the text to Gemini with a strict JSON system prompt.
- * 2. Asks for a Plain English translation (reduces syntactic fatigue).
- * 3. Identifies complex words (>3 syllables) and breaks them phonetically.
- * 4. Asks an age-appropriate K-12 Socratic check question for active recall.
  */
 export async function getCognitiveAssistance(
   paragraphText: string,
@@ -53,14 +63,12 @@ export async function getCognitiveAssistance(
     throw new Error("Missing Gemini API Key. Please configure it in your settings or .env file.");
   }
 
-  // Initialize the Gemini SDK with the student's or env API key
   const genAI = new GoogleGenerativeAI(apiKey.trim());
 
-  // Using low-latency Flash model optimized for quick UI feedback
   const model = genAI.getGenerativeModel({
-    model: "gemini-3.6-flash",
+    model: GEMINI_MODEL,
     generationConfig: {
-      responseMimeType: "application/json", // Enforce pure JSON response
+      responseMimeType: "application/json",
     },
   });
 
@@ -89,7 +97,6 @@ Paragraph:
     const rawText = result.response.text();
     const cleanedText = cleanJsonResponse(rawText);
 
-    // Parse into our strict TypeScript AssistPayload contract
     const parsedData: AssistPayload = JSON.parse(cleanedText);
     return parsedData;
   } catch (error) {
@@ -100,12 +107,6 @@ Paragraph:
 
 /**
  * Socratic Answer Evaluator with Edge-Case Safeguards
- * 
- * WHAT IT DOES:
- * Evaluates the student's answer to the Socratic question and handles:
- * - Empty, single-symbol, or non-answers ("idk", ".", "no", "pass")
- * - Gibberish / nonsense inputs ("asdfghjkl", "12345")
- * - Valid student attempts with supportive, 2-sentence feedback.
  */
 export async function evaluateSocraticAnswer(
   originalText: string,
@@ -119,25 +120,25 @@ export async function evaluateSocraticAnswer(
 
   const trimmed = studentAnswer.trim().toLowerCase();
 
-  // SAFEGUARD 1: Fast client-side fallback for empty or single punctuation
+  // Safeguard 1: Empty or single punctuation
   if (!trimmed || trimmed === "." || trimmed === "?" || trimmed === "!") {
     return "Give it a quick try! Please read the paragraph again and share what you think.";
   }
 
-  // SAFEGUARD 2: Fast client-side fallback for direct non-answers ("idk", "no", "idk bro")
+  // Safeguard 2: Direct non-answers
   const nonAnswerTriggers = ["idk", "i dont know", "i don't know", "no", "pass", "nothing", "dunno"];
   if (nonAnswerTriggers.includes(trimmed)) {
     return "No worries at all, reading takes practice! Please read the paragraph again and look for key details.";
   }
 
-  // SAFEGUARD 3: Fast client-side fallback for keyboard noise or repeating gibberish
+  // Safeguard 3: Keyboard noise or repeating gibberish (Regex fixed: 0-9)
   if (isLikelyGibberish(trimmed)) {
     return "That looks a bit like random letters! Please read the paragraph again and type your best answer.";
   }
 
   // AI Evaluation for meaningful inputs
   const genAI = new GoogleGenerativeAI(apiKey.trim());
-  const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
+  const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
   const prompt = `
 You are an encouraging tutor checking a K-12 student's reading comprehension.
@@ -159,7 +160,10 @@ Rules & Safeguards:
 
   try {
     const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const rawResponse = result.response.text().trim();
+    
+    // Programmatic enforcement of 2-sentence maximum
+    return limitToTwoSentences(rawResponse);
   } catch (error) {
     console.error("Error evaluating Socratic answer:", error);
     return "I couldn't contact the evaluation helper right now. Please read the paragraph again.";
