@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, FileText, Upload, Sun, Moon, Sparkles, BookOpen, Plus, Type, ZoomIn, ZoomOut } from 'lucide-react';
+import { Settings, FileText, Upload, Sparkles, BookOpen, Plus, Type, ZoomIn, ZoomOut } from 'lucide-react';
 import { Reader } from './components/Reader';
 import { AgentPanel } from './components/AgentPanel';
 import { SettingsModal } from './components/SettingsModal';
@@ -25,7 +25,7 @@ const DEFAULT_CONFIG: ReaderConfig = {
   wordSpacing: 0.16,
   lineHeight: 1.8,
   fontFamily: 'OpenDyslexic',
-  theme: 'sepia',
+  theme: 'dark',
   dwellTime: 4,
   rulerEnabled: true,
   rulerColor: 'rgba(253, 224, 71, 1)',
@@ -39,7 +39,7 @@ export default function App() {
       const saved = localStorage.getItem('dyslexi_flow_config');
       if (saved) {
         try {
-          return { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
+          return { ...DEFAULT_CONFIG, ...JSON.parse(saved), theme: 'dark' };
         } catch (e) {
           return DEFAULT_CONFIG;
         }
@@ -57,19 +57,15 @@ export default function App() {
 
   // Persistent Cache: Save settings to localStorage whenever config updates
   useEffect(() => {
-    localStorage.setItem('dyslexi_flow_config', JSON.stringify(config));
+    localStorage.setItem('dyslexi_flow_config', JSON.stringify({ ...config, theme: 'dark' }));
   }, [config]);
 
-  // Adjust HTML Root style theme tags when configuration theme changes
+  // Adjust HTML Root style theme tags to always keep dark mode
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove('dark', 'sepia-mode');
-    if (config.theme === 'dark') {
-      root.classList.add('dark');
-    } else if (config.theme === 'sepia') {
-      root.classList.add('sepia-mode');
-    }
-  }, [config.theme]);
+    root.classList.remove('sepia-mode');
+    root.classList.add('dark');
+  }, []);
 
   // Handle file uploads (.txt) (Day 3 Riyanshika Task)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,31 +152,6 @@ export default function App() {
             <Upload className="w-4 h-4" />
             <input type="file" accept=".txt" onChange={handleFileUpload} className="hidden" />
           </label>
-
-          {/* Theme Selector */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200/50 dark:border-slate-800">
-            <button
-              onClick={() => updateConfigField('theme', 'light')}
-              className={`p-1.5 rounded-md transition cursor-pointer ${config.theme === 'light' ? 'bg-white text-yellow-500 shadow-sm' : 'text-slate-500'}`}
-              title="Light Mode"
-            >
-              <Sun className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => updateConfigField('theme', 'sepia')}
-              className={`p-1.5 rounded-md transition cursor-pointer ${config.theme === 'sepia' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-500'}`}
-              title="Sepia Mode (Recommended for Reading)"
-            >
-              <span className="text-[10px] font-bold block leading-none px-0.5">Aa</span>
-            </button>
-            <button
-              onClick={() => updateConfigField('theme', 'dark')}
-              className={`p-1.5 rounded-md transition cursor-pointer ${config.theme === 'dark' ? 'bg-slate-800 text-indigo-400 shadow-sm' : 'text-slate-500'}`}
-              title="Dark Mode"
-            >
-              <Moon className="w-3.5 h-3.5" />
-            </button>
-          </div>
 
           {/* Settings cog */}
           <button

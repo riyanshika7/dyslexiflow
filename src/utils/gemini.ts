@@ -49,7 +49,7 @@ export async function getCognitiveAssistance(
 You are a cognitive reading assistant for K-12 students with ADHD and dyslexia.
 Analyze the following paragraph and provide structural reading assistance in STRICT JSON format matching this structure:
 {
-  "simplifiedText": "The paragraph rewritten in plain English (retaining original meaning but simplifying syntax).",
+  "simplifiedText": "The paragraph rewritten in plain English. Do not shorten it too much; instead, elaborate the paragraph's core concepts in detail using simple, friendly, and non-fatiguing words (K-12 vocabulary) to ensure complete understanding.",
   "syllabifiedWords": [
     { "original": "complexWord", "syllables": "com-plex-word" }
   ],
@@ -107,8 +107,13 @@ Original Text: "${originalText}"
 Socratic Question: "${question}"
 Student's Answer: "${studentAnswer}"
 
-Provide encouraging, constructive feedback based on their answer.
-CRITICAL CONSTRAINT: Your entire response MUST BE EXACTLY 2 SENTENCES long. No more, no less.
+Rules:
+1. Determine if the student's answer is correct or not based on the original text.
+2. If the student's answer is incorrect, wrong, incomplete, or demonstrates a misunderstanding:
+   - Provide encouraging, supportive feedback explaining why they are wrong, AND
+   - EXPLICITLY state: "Please read the paragraph again."
+3. If the student's answer is correct, provide warm feedback validating their understanding.
+4. CRITICAL CONSTRAINT: Your entire response MUST BE EXACTLY 2 SENTENCES long. No more, no less.
 `;
 
   try {
@@ -116,6 +121,6 @@ CRITICAL CONSTRAINT: Your entire response MUST BE EXACTLY 2 SENTENCES long. No m
     return result.response.text().trim();
   } catch (error) {
     console.error("Error evaluating Socratic answer:", error);
-    return "Great effort! Keep reading closely to catch every detail.";
+    return "I couldn't contact the evaluation helper right now. Please review the paragraph again to verify your answer!";
   }
 }

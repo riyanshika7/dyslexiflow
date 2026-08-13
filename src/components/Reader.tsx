@@ -44,21 +44,27 @@ export const Reader: React.FC<ReaderProps> = ({
 
   // Handle struggle/dwell detection timer
   useEffect(() => {
+    console.log("Timer Effect: activeIdx =", activeIdx, "dwellTime =", dwellTime);
+    
     // Clear any existing timer when active paragraph changes
     if (timerRef.current) {
+      console.log("Clearing existing timer:", timerRef.current);
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
 
     if (activeIdx !== null && paragraphs[activeIdx]) {
+      console.log("Setting struggle timer for index", activeIdx, "text:", paragraphs[activeIdx].substring(0, 20) + "...");
       // Start a new timer for the active paragraph
       timerRef.current = setTimeout(() => {
+        console.log("Timer fired! Struggle detected for paragraph:", activeIdx);
         onStruggleDetected(paragraphs[activeIdx], activeIdx);
       }, dwellTime * 1000);
     }
 
     return () => {
       if (timerRef.current) {
+        console.log("Cleanup: clearing timer:", timerRef.current);
         clearTimeout(timerRef.current);
       }
     };
