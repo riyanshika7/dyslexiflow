@@ -119,18 +119,18 @@ export async function evaluateSocraticAnswer(
 
   const trimmed = studentAnswer.trim().toLowerCase();
 
-  // 🛡️ SAFEGUARD 1: Fast client-side fallback for empty or single punctuation
+  // SAFEGUARD 1: Fast client-side fallback for empty or single punctuation
   if (!trimmed || trimmed === "." || trimmed === "?" || trimmed === "!") {
     return "Give it a quick try! Please read the paragraph again and share what you think.";
   }
 
-  // 🛡️ SAFEGUARD 2: Fast client-side fallback for direct non-answers ("idk", "no", "idk bro")
+  // SAFEGUARD 2: Fast client-side fallback for direct non-answers ("idk", "no", "idk bro")
   const nonAnswerTriggers = ["idk", "i dont know", "i don't know", "no", "pass", "nothing", "dunno"];
   if (nonAnswerTriggers.includes(trimmed)) {
     return "No worries at all, reading takes practice! Please read the paragraph again and look for key details.";
   }
 
-  // 🛡️ SAFEGUARD 3: Fast client-side fallback for keyboard noise or repeating gibberish
+  // SAFEGUARD 3: Fast client-side fallback for keyboard noise or repeating gibberish
   if (isLikelyGibberish(trimmed)) {
     return "That looks a bit like random letters! Please read the paragraph again and type your best answer.";
   }
