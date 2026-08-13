@@ -33,60 +33,79 @@ export const Reader: React.FC<ReaderProps> = ({
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [rulerTop, setRulerTop] = useState<number>(0);
   const [isMouseOverReader, setIsMouseOverReader] = useState<boolean>(false);
+
   const readerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Split text by newlines and filter out empty paragraphs
+  // Prevent repeated struggle detection for the same paragraph
+  const triggeredIdxRef = useRef<number | null>(null);
+
+  // Split text into paragraphs
   const paragraphs = text
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter((p) => p.length > 0);
 
-  // Handle struggle/dwell detection timer
+  // Handle struggle / dwell detection
   useEffect(() => {
-    console.log("Timer Effect: activeIdx =", activeIdx, "dwellTime =", dwellTime);
-    
-    // Clear any existing timer when active paragraph changes
+    // Clear any existing timer when the active paragraph changes
     if (timerRef.current) {
-      console.log("Clearing existing timer:", timerRef.current);
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
 
-    if (activeIdx !== null && paragraphs[activeIdx]) {
-      console.log("Setting struggle timer for index", activeIdx, "text:", paragraphs[activeIdx].substring(0, 20) + "...");
-      // Start a new timer for the active paragraph
+    if (
+      activeIdx !== null &&
+      paragraphs[activeIdx] &&
+      triggeredIdxRef.current !== activeIdx
+    ) {
       timerRef.current = setTimeout(() => {
-        console.log("Timer fired! Struggle detected for paragraph:", activeIdx);
+        triggeredIdxRef.current = activeIdx;
         onStruggleDetected(paragraphs[activeIdx], activeIdx);
       }, dwellTime * 1000);
     }
 
     return () => {
       if (timerRef.current) {
-        console.log("Cleanup: clearing timer:", timerRef.current);
         clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
     };
   }, [activeIdx, dwellTime, text]);
 
-  // Handle mouse moves to position the reading ruler
+  // Handle mouse movement for the Dyslexia Ruler
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!rulerEnabled || !readerRef.current) return;
+
     const rect = readerRef.current.getBoundingClientRect();
     const relativeY = e.clientY - rect.top;
-    setRulerTop(relativeY);
+
+    // Keep the ruler inside the reader container
+    const minY = rulerHeight / 2;
+    const maxY = rect.height - rulerHeight / 2;
+    const clampedY = Math.max(minY, Math.min(relativeY, maxY));
+
+    setRulerTop(clampedY);
   };
 
+  // Handle paragraph focus
   const handleParagraphEnter = (index: number, pText: string) => {
+    // Reset the struggle trigger when moving to a different paragraph
+    if (triggeredIdxRef.current !== index) {
+      triggeredIdxRef.current = null;
+    }
+
     setActiveIdx(index);
     onParagraphFocus(pText, index);
   };
 
+  // Handle leaving the reader
   const handleParagraphLeave = () => {
     setActiveIdx(null);
+    triggeredIdxRef.current = null;
   };
 
+  // Reader typography settings
   const readerStyles: React.CSSProperties = {
     fontFamily: fontFamily === 'OpenDyslexic' ? '"OpenDyslexic", sans-serif' : fontFamily,
     fontSize: `${fontSize}px`,
@@ -97,7 +116,7 @@ export const Reader: React.FC<ReaderProps> = ({
   };
 
   return (
-    <div 
+    <div
       className="relative select-text overflow-y-auto pr-4 h-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 focus:outline-none"
       ref={readerRef}
       onMouseMove={handleMouseMove}
@@ -122,6 +141,7 @@ export const Reader: React.FC<ReaderProps> = ({
         />
       )}
 
+      {/* Empty reader state */}
       {paragraphs.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12 text-center">
           <Type size={48} className="mb-4 stroke-1 text-slate-300" />
