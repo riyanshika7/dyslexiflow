@@ -35,6 +35,7 @@ const DEFAULT_CONFIG: ReaderConfig = {
   rulerColor: 'rgba(253, 224, 71, 1)',
   rulerHeight: 30,
   apiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
+  theme: 'dark',
 };
 
 export default function App() {
@@ -64,12 +65,17 @@ export default function App() {
     localStorage.setItem('dyslexi_flow_config', JSON.stringify(config));
   }, [config]);
 
-  // Adjust HTML Root style theme tags to always keep dark mode
+  // Apply the active theme class to the document root
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove('sepia-mode');
-    root.classList.add('dark');
-  }, []);
+    root.classList.remove('dark','sepia-mode');
+    if(config.theme==='dark'){
+      root.classList.add('dark');
+    }else if(config.theme === 'sepia'){
+      root.classList.add('sepia-mode')
+    }
+    // 'light' theme = no class needed, it's the default Tailwind state
+  }, [config.theme]);
 
   // Handle file uploads (.txt)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
