@@ -22,9 +22,9 @@ function cleanJsonResponse(text: string): string {
  * 
  * HOW IT WORKS:
  * 1. Sends the text to Gemini with a strict JSON system prompt.
- * 2. Asks for a Plain English translation (reduces syntactic fatigue).
+ * 2. Asks for a Detailed Plain English elaboration (reduces syntactic fatigue while maintaining full context).
  * 3. Identifies complex words (>3 syllables) and breaks them phonetically.
- * 4. Asks a Socratic comprehension check question to encourage active recall.
+ * 4. Asks a friendly K-12 Socratic comprehension check question to encourage active recall.
  */
 export async function getCognitiveAssistance(
   paragraphText: string,
@@ -58,7 +58,8 @@ Analyze the following paragraph and provide structural reading assistance in STR
 
 Rules:
 1. "syllabifiedWords": Select 2-4 words with high structural complexity (>3 syllables) and break them into phonetic syllables (e.g. "communication" -> "com-mu-ni-ca-tion").
-2. DO NOT return markdown wrappers (no \`\`\`json). Return raw JSON only.
+2. "socraticQuestion": Craft a friendly, simple check question tailored for K-12 readers (under 15 words) that can be answered in one short sentence.
+3. DO NOT return markdown wrappers (no \`\`\`json). Return raw JSON only.
 
 Paragraph:
 "${paragraphText}"
@@ -83,7 +84,7 @@ Paragraph:
  * 
  * WHAT IT DOES:
  * Evaluates the student's answer to the Socratic question and returns short, 
- * encouraging feedback.
+ * encouraging feedback. Handles edge cases (empty inputs, "idk", gibberish) gracefully.
  * 
  * CONSTRAINT:
  * Strictly limited to 2 sentences to prevent cognitive overload.
@@ -95,7 +96,18 @@ export async function evaluateSocraticAnswer(
   apiKey: string
 ): Promise<string> {
   if (!apiKey || apiKey.trim() === "") {
-    return "Great effort! Keep reading closely.";
+    return "Great effort! Please read the paragraph again.";
+  }
+
+  // Edge Case 1: Pre-check for empty or punctuation-only inputs
+  const trimmedInput = studentAnswer.trim().toLowerCase();
+  if (!trimmedInput || trimmedInput === "." || trimmedInput === "?" || trimmedInput === "!") {
+    return "Give it a try! Please read the paragraph again to find the answer.";
+  }
+
+  // Edge Case 2: Pre-check for explicit "I don't know" responses
+  if (["idk", "i don't know", "dont know", "no idea", "pass"].includes(trimmedInput)) {
+    return "No worries at all! Please read the paragraph again to find a quick clue.";
   }
 
   const genAI = new GoogleGenerativeAI(apiKey.trim());
@@ -108,9 +120,9 @@ Socratic Question: "${question}"
 Student's Answer: "${studentAnswer}"
 
 Rules:
-1. Determine if the student's answer is correct or not based on the original text.
-2. If the student's answer is incorrect, wrong, incomplete, or demonstrates a misunderstanding:
-   - Provide encouraging, supportive feedback explaining why they are wrong, AND
+1. Determine if the student's answer is correct, incorrect, incomplete, or gibberish based on the original text.
+2. If the student's answer is incorrect, wrong, incomplete, gibberish (e.g. "asdfgh"), or demonstrates a misunderstanding:
+   - Provide encouraging, supportive feedback explaining why or guiding them, AND
    - EXPLICITLY state: "Please read the paragraph again."
 3. If the student's answer is correct, provide warm feedback validating their understanding.
 4. CRITICAL CONSTRAINT: Your entire response MUST BE EXACTLY 2 SENTENCES long. No more, no less.
