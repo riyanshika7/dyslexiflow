@@ -77,7 +77,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
     }
   };
 
-  // Speaks paragraph text (simplified or original) (Day 2 Riyanshika Task)
+  // Speaks paragraph text (simplified or original)
   const handleSpeak = (textToSpeak: string, type: 'simplified' | 'original') => {
     if (!synthRef.current) return;
 
@@ -110,7 +110,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
     synthRef.current.speak(utterance);
   };
 
-  // Speaks an individual syllable word slowly (Day 2 Riyanshika Task)
+  // Speaks an individual syllable word slowly
   const speakSyllable = (word: string) => {
     if (!synthRef.current) return;
     

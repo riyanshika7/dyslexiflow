@@ -17,6 +17,11 @@ Black holes are regions of spacetime where gravity is so strong that nothing, no
 A major driver of this change was the development of the steam engine. Originally created to pump water out of coal mines, it was refined by James Watt to provide continuous rotative motion. This allowed factories to be built away from rivers, completely transforming the geography of manufacturing and urban development.
 
 The social impacts were profound. While it led to an unprecedented rise in the rate of population growth and average income, it also created challenging working conditions. Young children worked long hours in textile mills, and crowded tenement housing in industrial cities led to public health crises before labor laws were established.`,
+  biology: `Photosynthesis is a chemical process that occurs in plants, algae, and some bacteria. It converts light energy, usually from the Sun, into chemical energy that can be later released to fuel the organisms' activities. This chemical energy is stored in carbohydrate molecules, such as sugars, which are synthesized from carbon dioxide and water.
+
+Chloroplasts are specialized organelles found in plant and algal cells. These organelles conduct photosynthesis. They contain a high concentration of chlorophyll, a green pigment that absorbs light energy. During the light-dependent reactions, water is split into oxygen and hydrogen ions, releasing oxygen gas as a byproduct.
+
+Carbon fixation is the process by which inorganic carbon dioxide is converted into organic compounds by living organisms. The Calvin cycle, which takes place in the stroma of the chloroplast, is the primary pathway for carbon fixation in plants. This cycle uses the chemical energy stored during the light reactions to synthesize sugars from carbon dioxide.`,
 };
 
 const DEFAULT_CONFIG: ReaderConfig = {
@@ -67,7 +72,7 @@ export default function App() {
     root.classList.add('dark');
   }, []);
 
-  // Handle file uploads (.txt) (Day 3 Riyanshika Task)
+  // Handle file uploads (.txt)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -98,7 +103,7 @@ export default function App() {
     setStruggleText(null);
   };
 
-  const loadSample = (type: 'space' | 'history') => {
+  const loadSample = (type: 'space' | 'history' | 'biology') => {
     setText(SAMPLES[type]);
     resetReadingState();
   };
@@ -138,6 +143,12 @@ export default function App() {
               className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
             >
               Industrial Revolution
+            </button>
+            <button
+              onClick={() => loadSample('biology')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+            >
+              Photosynthesis
             </button>
             <button
               onClick={() => setCustomTextOpen(true)}
