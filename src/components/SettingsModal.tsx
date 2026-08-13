@@ -1,24 +1,12 @@
 import React from 'react';
-import { X, HelpCircle, Key, Eye, Clock, Sliders } from 'lucide-react';
-
-interface SettingsConfig {
-  apiKey: string;
-  dwellTime: number;
-  rulerEnabled: boolean;
-  rulerColor: string;
-  rulerHeight: number;
-  fontFamily: string;
-  fontSize: number;
-  lineHeight: number;
-  wordSpacing: number;
-  letterSpacing: number;
-}
+import { X, Key, Eye, Clock, Sliders } from 'lucide-react';
+import type { ReaderConfig } from '../types';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  config: SettingsConfig;
-  onConfigChange: (newConfig: SettingsConfig) => void;
+  config: ReaderConfig;
+  onConfigChange: (newConfig: ReaderConfig) => void;
 }
 
 const RULER_COLORS = [
@@ -26,13 +14,6 @@ const RULER_COLORS = [
   { name: 'Blue', value: 'rgba(147, 197, 253, 1)' },   // Tailwinds blue-300
   { name: 'Pink', value: 'rgba(244, 114, 182, 1)' },   // Tailwinds pink-400
   { name: 'Green', value: 'rgba(134, 239, 172, 1)' },  // Tailwinds green-300
-];
-
-const FONTS = [
-  { name: 'OpenDyslexic (Accessibility-first)', value: 'OpenDyslexic' },
-  { name: 'Comic Neue (Dyslexia-friendly)', value: 'Comic Neue, Comic Sans MS' },
-  { name: 'System Sans (Direct)', value: 'system-ui, sans-serif' },
-  { name: 'Playfair Display (Serif contrast)', value: 'Playfair Display, Georgia, serif' },
 ];
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -43,7 +24,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const updateField = (field: keyof SettingsConfig, value: any) => {
+  const updateField = (field: keyof ReaderConfig, value: any) => {
     onConfigChange({ ...config, [field]: value });
   };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX, Sparkles, Send, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
-import { simplifyText, SimplifiedResponse, evaluateSocraticAnswer } from '../utils/gemini';
+import { getCognitiveAssistance, evaluateSocraticAnswer } from '../utils/gemini';
+import type { AssistPayload } from '../types';
 
 interface AgentPanelProps {
   activeParagraphText: string | null;
@@ -17,7 +18,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [aiData, setAiData] = useState<SimplifiedResponse | null>(null);
+  const [aiData, setAiData] = useState<AssistPayload | null>(null);
   
   // Socratic Q&A States
   const [userAnswer, setUserAnswer] = useState<string>('');
@@ -63,7 +64,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
     stopSpeech();
 
     try {
-      const data = await simplifyText(apiKey, text);
+      // Call Lidetu's unified API function
+      const data = await getCognitiveAssistance(text, apiKey);
       setAiData(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.');
@@ -73,6 +75,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
     }
   };
 
+  // Speaks the simplified paragraph text (Day 2 Riyanshika Task)
   const handleSpeak = (textToSpeak: string) => {
     if (!synthRef.current) return;
 
@@ -81,10 +84,15 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
       return;
     }
 
-    // Cancel any active speech
+    // Cancel any active speech queues (TTS Safety)
     synthRef.current.cancel();
 
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    
+    // Set parameters optimized for neurodivergent auditory comprehension
+    utterance.rate = 0.9; // Slightly slower, highly clear reading pace
+    utterance.pitch = 1.0;
+
     utterance.onend = () => {
       setIsSpeaking(false);
     };
@@ -97,13 +105,19 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
     synthRef.current.speak(utterance);
   };
 
+  // Speaks an individual syllable word slowly (Day 2 Riyanshika Task)
   const speakSyllable = (word: string) => {
     if (!synthRef.current) return;
+    
+    // Clear standard read-aloud queues immediately
     synthRef.current.cancel();
     
-    // Low-speed reading for clear syllable enunciation
     const utterance = new SpeechSynthesisUtterance(word);
-    utterance.rate = 0.75; 
+    
+    // Slower phonetic pronunciation rate for sound-to-letter mappings
+    utterance.rate = 0.7; 
+    utterance.pitch = 1.0;
+
     synthRef.current.speak(utterance);
   };
 
@@ -124,7 +138,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
     try {
       const feedback = await evaluateSocraticAnswer(
         apiKey,
-        aiData.socraticPrompt,
+        aiData.socraticQuestion,
         struggleParagraphText,
         userAnswer
       );
@@ -214,28 +228,28 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
                   {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-slate-800 dark:text-slate-200 text-base leading-relaxed">
+              <p className="text-slate-800 dark:text-slate-200 text-base leading-relaxed font-normal">
                 {aiData.simplifiedText}
               </p>
             </div>
 
             {/* 2. Syllable Word Breakdowns */}
-            {aiData.syllables && aiData.syllables.length > 0 && (
+            {aiData.syllabifiedWords && aiData.syllabifiedWords.length > 0 && (
               <div className="space-y-2">
                 <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
                   Interactive Phonetic Guides
                 </span>
                 <div className="grid grid-cols-2 gap-2">
-                  {aiData.syllables.map((s, index) => (
+                  {aiData.syllabifiedWords.map((s, index) => (
                     <div
                       key={index}
-                      onClick={() => speakSyllable(s.word)}
+                      onClick={() => speakSyllable(s.original)}
                       className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 hover:border-indigo-400 hover:shadow-sm cursor-pointer transition flex items-center justify-between group"
                     >
                       <div>
-                        <p className="text-xs text-slate-400">{s.word}</p>
+                        <p className="text-xs text-slate-400 font-semibold">{s.original}</p>
                         <p className="font-semibold text-indigo-600 dark:text-indigo-400 tracking-wide text-sm mt-0.5">
-                          {s.breakdown}
+                          {s.syllables}
                         </p>
                       </div>
                       <Volume2 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-500 transition" />
@@ -252,7 +266,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
                   Comprehension Check
                 </span>
                 <p className="text-slate-800 dark:text-slate-200 font-medium text-sm">
-                  {aiData.socraticPrompt}
+                  {aiData.socraticQuestion}
                 </p>
               </div>
 
@@ -267,7 +281,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
                 <button
                   type="submit"
                   disabled={feedbackLoading || !userAnswer.trim()}
-                  className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md font-medium text-xs disabled:opacity-50 transition"
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md font-semibold text-xs disabled:opacity-50 transition cursor-pointer"
                 >
                   {feedbackLoading ? (
                     <>

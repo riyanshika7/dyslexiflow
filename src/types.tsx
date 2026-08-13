@@ -11,12 +11,16 @@ export interface AssistPayload {
   socraticQuestion: string;
 }
 
-// 3. Reader styling and app configuration settings
 export interface ReaderConfig {
   fontSize: number;       // e.g., 18
-  letterSpacing: number;  // e.g., 1.5
-  lineHeight: number;     // e.g., 1.6
+  letterSpacing: number;  // e.g., 0.08 (in em)
+  wordSpacing: number;    // e.g., 0.16 (in em)
+  lineHeight: number;     // e.g., 1.8 (multiplier)
+  fontFamily: string;     // e.g., 'OpenDyslexic', 'Comic Neue'
   theme: 'light' | 'dark' | 'sepia';
   dwellTime: number;      // dwell threshold in seconds (e.g., 4)
+  rulerEnabled: boolean;  // visual highlight ruler line
+  rulerColor: string;     // color overlay (rgba)
+  rulerHeight: number;    // vertical thickness in px
   apiKey?: string;        // Gemini API Key stored in config
 }
