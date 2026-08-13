@@ -43,11 +43,10 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
 
   // Whenever a struggle is detected, trigger the Gemini analyzer agent
   useEffect(() => {
-    console.log("AgentPanel Trigger: struggleParagraphText changed:", struggleParagraphText ? struggleParagraphText.substring(0, 20) + "..." : null, "apiKey present:", !!apiKey);
     if (struggleParagraphText && apiKey) {
       triggerAnalysis(struggleParagraphText);
     }
-  }, [struggleParagraphText]);
+  }, [struggleParagraphText, apiKey]);
 
   // If the active paragraph changes, we reset states if the user moved on
   useEffect(() => {
