@@ -3,6 +3,7 @@ import { Settings, FileText, Upload, Sun, Moon, Sparkles, BookOpen, Plus, Type, 
 import { Reader } from './components/Reader';
 import { AgentPanel } from './components/AgentPanel';
 import { SettingsModal } from './components/SettingsModal';
+import type { ReaderConfig } from './types';
 
 // Sample texts for the demo
 const SAMPLES = {
@@ -18,34 +19,22 @@ A major driver of this change was the development of the steam engine. Originall
 The social impacts were profound. While it led to an unprecedented rise in the rate of population growth and average income, it also created challenging working conditions. Young children worked long hours in textile mills, and crowded tenement housing in industrial cities led to public health crises before labor laws were established.`,
 };
 
-interface ReadingConfig {
-  apiKey: string;
-  dwellTime: number;
-  rulerEnabled: boolean;
-  rulerColor: string;
-  rulerHeight: number;
-  fontFamily: string;
-  fontSize: number;
-  lineHeight: number;
-  wordSpacing: number;
-  letterSpacing: number;
-}
-
-const DEFAULT_CONFIG: ReadingConfig = {
-  apiKey: '',
+const DEFAULT_CONFIG: ReaderConfig = {
+  fontSize: 20,
+  letterSpacing: 0.08,
+  wordSpacing: 0.16,
+  lineHeight: 1.8,
+  fontFamily: 'OpenDyslexic',
+  theme: 'sepia',
   dwellTime: 4,
   rulerEnabled: true,
-  rulerColor: 'rgba(253, 224, 71, 1)', // Yellow
+  rulerColor: 'rgba(253, 224, 71, 1)',
   rulerHeight: 30,
-  fontFamily: 'OpenDyslexic',
-  fontSize: 20,
-  lineHeight: 1.8,
-  wordSpacing: 0.16,
-  letterSpacing: 0.08,
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
 };
 
-function App() {
-  const [config, setConfig] = useState<ReadingConfig>(() => {
+export default function App() {
+  const [config, setConfig] = useState<ReaderConfig>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('dyslexi_flow_config');
       if (saved) {
@@ -59,40 +48,30 @@ function App() {
     return DEFAULT_CONFIG;
   });
 
-  const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('dyslexi_flow_theme');
-      return (saved as 'light' | 'dark' | 'sepia') || 'sepia'; // Sepia defaults for reading
-    }
-    return 'sepia';
-  });
-
   const [text, setText] = useState<string>(SAMPLES.space);
   const [activeText, setActiveText] = useState<string | null>(null);
-  const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [struggleText, setStruggleText] = useState<string | null>(null);
-  const [struggleIdx, setStruggleIdx] = useState<number | null>(null);
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const [customTextOpen, setCustomTextOpen] = useState<boolean>(false);
   const [customTextInput, setCustomTextInput] = useState<string>('');
 
-  // Persist configurations
+  // Persistent Cache: Save settings to localStorage whenever config updates
   useEffect(() => {
     localStorage.setItem('dyslexi_flow_config', JSON.stringify(config));
   }, [config]);
 
+  // Adjust HTML Root style theme tags when configuration theme changes
   useEffect(() => {
-    localStorage.setItem('dyslexi_flow_theme', theme);
     const root = document.documentElement;
     root.classList.remove('dark', 'sepia-mode');
-    if (theme === 'dark') {
+    if (config.theme === 'dark') {
       root.classList.add('dark');
-    } else if (theme === 'sepia') {
+    } else if (config.theme === 'sepia') {
       root.classList.add('sepia-mode');
     }
-  }, [theme]);
+  }, [config.theme]);
 
-  // Handle file uploads (.txt)
+  // Handle file uploads (.txt) (Day 3 Riyanshika Task)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -120,14 +99,16 @@ function App() {
 
   const resetReadingState = () => {
     setActiveText(null);
-    setActiveIdx(null);
     setStruggleText(null);
-    setStruggleIdx(null);
   };
 
   const loadSample = (type: 'space' | 'history') => {
     setText(SAMPLES[type]);
     resetReadingState();
+  };
+
+  const updateConfigField = (field: keyof ReaderConfig, value: any) => {
+    setConfig({ ...config, [field]: value });
   };
 
   return (
@@ -152,19 +133,19 @@ function App() {
           <div className="hidden md:flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200/50 dark:border-slate-800">
             <button
               onClick={() => loadSample('space')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition"
+              className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
             >
               Astrophysics
             </button>
             <button
               onClick={() => loadSample('history')}
-              className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition"
+              className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
             >
               Industrial Revolution
             </button>
             <button
               onClick={() => setCustomTextOpen(true)}
-              className="px-2.5 py-1 text-xs font-semibold rounded-md bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1 transition"
+              className="px-2.5 py-1 text-xs font-semibold rounded-md bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1 transition cursor-pointer"
             >
               <Plus className="w-3 h-3" /> Paste Text
             </button>
@@ -179,22 +160,22 @@ function App() {
           {/* Theme Selector */}
           <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200/50 dark:border-slate-800">
             <button
-              onClick={() => setTheme('light')}
-              className={`p-1.5 rounded-md transition ${theme === 'light' ? 'bg-white text-yellow-500 shadow-sm' : 'text-slate-500'}`}
+              onClick={() => updateConfigField('theme', 'light')}
+              className={`p-1.5 rounded-md transition cursor-pointer ${config.theme === 'light' ? 'bg-white text-yellow-500 shadow-sm' : 'text-slate-500'}`}
               title="Light Mode"
             >
               <Sun className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => setTheme('sepia')}
-              className={`p-1.5 rounded-md transition ${theme === 'sepia' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-500'}`}
+              onClick={() => updateConfigField('theme', 'sepia')}
+              className={`p-1.5 rounded-md transition cursor-pointer ${config.theme === 'sepia' ? 'bg-amber-100 text-amber-800 shadow-sm' : 'text-slate-500'}`}
               title="Sepia Mode (Recommended for Reading)"
             >
               <span className="text-[10px] font-bold block leading-none px-0.5">Aa</span>
             </button>
             <button
-              onClick={() => setTheme('dark')}
-              className={`p-1.5 rounded-md transition ${theme === 'dark' ? 'bg-slate-800 text-indigo-400 shadow-sm' : 'text-slate-500'}`}
+              onClick={() => updateConfigField('theme', 'dark')}
+              className={`p-1.5 rounded-md transition cursor-pointer ${config.theme === 'dark' ? 'bg-slate-800 text-indigo-400 shadow-sm' : 'text-slate-500'}`}
               title="Dark Mode"
             >
               <Moon className="w-3.5 h-3.5" />
@@ -204,7 +185,7 @@ function App() {
           {/* Settings cog */}
           <button
             onClick={() => setSettingsOpen(true)}
-            className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-300 transition"
+            className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-300 transition cursor-pointer"
             title="AI & Ruler Settings"
           >
             <Settings className="w-4 h-4" />
@@ -220,7 +201,7 @@ function App() {
             <Type className="w-3.5 h-3.5 text-slate-400" />
             <select
               value={config.fontFamily}
-              onChange={(e) => setConfig({ ...config, fontFamily: e.target.value })}
+              onChange={(e) => updateConfigField('fontFamily', e.target.value)}
               className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2 py-1 focus:outline-none dark:text-slate-100 font-semibold"
             >
               <option value="OpenDyslexic">OpenDyslexic</option>
@@ -233,16 +214,16 @@ function App() {
           {/* Font Size control */}
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setConfig({ ...config, fontSize: Math.max(14, config.fontSize - 1) })}
-              className="p-1 border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition"
+              onClick={() => updateConfigField('fontSize', Math.max(14, config.fontSize - 1))}
+              className="p-1 border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition cursor-pointer"
               title="Decrease Font Size"
             >
               <ZoomOut className="w-3 h-3" />
             </button>
             <span className="px-2 font-mono text-slate-500">{config.fontSize}px</span>
             <button
-              onClick={() => setConfig({ ...config, fontSize: Math.min(32, config.fontSize + 1) })}
-              className="p-1 border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition"
+              onClick={() => updateConfigField('fontSize', Math.min(32, config.fontSize + 1))}
+              className="p-1 border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition cursor-pointer"
               title="Increase Font Size"
             >
               <ZoomIn className="w-3 h-3" />
@@ -260,7 +241,7 @@ function App() {
                 max="0.4"
                 step="0.02"
                 value={config.wordSpacing}
-                onChange={(e) => setConfig({ ...config, wordSpacing: parseFloat(e.target.value) })}
+                onChange={(e) => updateConfigField('wordSpacing', parseFloat(e.target.value))}
                 className="w-16 accent-indigo-600"
               />
             </div>
@@ -273,7 +254,7 @@ function App() {
                 max="0.2"
                 step="0.01"
                 value={config.letterSpacing}
-                onChange={(e) => setConfig({ ...config, letterSpacing: parseFloat(e.target.value) })}
+                onChange={(e) => updateConfigField('letterSpacing', parseFloat(e.target.value))}
                 className="w-16 accent-indigo-600"
               />
             </div>
@@ -286,7 +267,7 @@ function App() {
                 max="2.8"
                 step="0.1"
                 value={config.lineHeight}
-                onChange={(e) => setConfig({ ...config, lineHeight: parseFloat(e.target.value) })}
+                onChange={(e) => updateConfigField('lineHeight', parseFloat(e.target.value))}
                 className="w-16 accent-indigo-600"
               />
             </div>
@@ -314,13 +295,11 @@ function App() {
             rulerColor={config.rulerColor}
             rulerHeight={config.rulerHeight}
             dwellTime={config.dwellTime}
-            onParagraphFocus={(pText, idx) => {
+            onParagraphFocus={(pText) => {
               setActiveText(pText);
-              setActiveIdx(idx);
             }}
-            onStruggleDetected={(pText, idx) => {
+            onStruggleDetected={(pText) => {
               setStruggleText(pText);
-              setStruggleIdx(idx);
             }}
           />
         </section>
@@ -330,7 +309,7 @@ function App() {
           <AgentPanel
             activeParagraphText={activeText}
             struggleParagraphText={struggleText}
-            apiKey={config.apiKey}
+            apiKey={config.apiKey || ''}
             dwellTime={config.dwellTime}
           />
         </section>
@@ -361,13 +340,13 @@ function App() {
               <button
                 type="button"
                 onClick={() => setCustomTextOpen(false)}
-                className="py-1.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg font-semibold text-xs transition"
+                className="py-1.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg font-semibold text-xs transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="py-1.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold text-xs shadow-sm transition"
+                className="py-1.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold text-xs shadow-sm transition cursor-pointer"
               >
                 Load Document
               </button>
@@ -386,5 +365,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

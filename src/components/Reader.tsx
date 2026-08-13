@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Eye, Settings, Type } from 'lucide-react';
+import { Type } from 'lucide-react';
 
 interface ReaderProps {
   text: string;
@@ -34,7 +34,7 @@ export const Reader: React.FC<ReaderProps> = ({
   const [rulerTop, setRulerTop] = useState<number>(0);
   const [isMouseOverReader, setIsMouseOverReader] = useState<boolean>(false);
   const readerRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Split text by newlines and filter out empty paragraphs
   const paragraphs = text
