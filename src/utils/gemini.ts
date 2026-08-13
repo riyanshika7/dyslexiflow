@@ -49,7 +49,7 @@ export async function getCognitiveAssistance(
 You are a cognitive reading assistant for K-12 students with ADHD and dyslexia.
 Analyze the following paragraph and provide structural reading assistance in STRICT JSON format matching this structure:
 {
-  "simplifiedText": "The paragraph rewritten in plain English. Do not shorten it too much; instead, elaborate the paragraph's core concepts in detail using simple, friendly, and non-fatiguing words (K-12 vocabulary) to ensure complete understanding.",
+  "simplifiedText": "The paragraph rewritten in plain English. Do not shorten it too much; instead, elaborate the paragraph's core concepts in detail using simple, friendly, and non-fatiguing words (K-12 vocabulary) to ensure complete understanding. Stay faithful to the paragraph and do not introduce new facts.",
   "syllabifiedWords": [
     { "original": "complexWord", "syllables": "com-plex-word" }
   ],
