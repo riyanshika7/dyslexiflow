@@ -121,6 +121,6 @@ Rules:
     return result.response.text().trim();
   } catch (error) {
     console.error("Error evaluating Socratic answer:", error);
-    return "I couldn't contact the evaluation helper right now. Please review the paragraph again to verify your answer!";
+    return "I couldn't contact the evaluation helper right now. Please read the paragraph again.";
   }
 }
