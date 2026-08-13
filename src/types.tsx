@@ -17,7 +17,6 @@ export interface ReaderConfig {
   wordSpacing: number;    // e.g., 0.16 (in em)
   lineHeight: number;     // e.g., 1.8 (multiplier)
   fontFamily: string;     // e.g., 'OpenDyslexic', 'Comic Neue'
-  theme: 'light' | 'dark' | 'sepia';
   dwellTime: number;      // dwell threshold in seconds (e.g., 4)
   rulerEnabled: boolean;  // visual highlight ruler line
   rulerColor: string;     // color overlay (rgba)

@@ -30,7 +30,6 @@ const DEFAULT_CONFIG: ReaderConfig = {
   wordSpacing: 0.16,
   lineHeight: 1.8,
   fontFamily: 'OpenDyslexic',
-  theme: 'dark',
   dwellTime: 4,
   rulerEnabled: true,
   rulerColor: 'rgba(253, 224, 71, 1)',
@@ -44,7 +43,7 @@ export default function App() {
       const saved = localStorage.getItem('dyslexi_flow_config');
       if (saved) {
         try {
-          return { ...DEFAULT_CONFIG, ...JSON.parse(saved), theme: 'dark' };
+          return { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
         } catch (e) {
           return DEFAULT_CONFIG;
         }
@@ -62,7 +61,7 @@ export default function App() {
 
   // Persistent Cache: Save settings to localStorage whenever config updates
   useEffect(() => {
-    localStorage.setItem('dyslexi_flow_config', JSON.stringify({ ...config, theme: 'dark' }));
+    localStorage.setItem('dyslexi_flow_config', JSON.stringify(config));
   }, [config]);
 
   // Adjust HTML Root style theme tags to always keep dark mode
