@@ -14,6 +14,25 @@ function cleanJsonResponse(text: string): string {
 }
 
 /**
+ * Helper to identify if a string is gibberish or non-linguistic noise.
+ */
+function isLikelyGibberish(text: string): boolean {
+  const trimmed = text.trim().toLowerCase();
+  
+  // Single characters, punctuation only, or common non-answers
+  if (trimmed.length <= 1 || /^[^a-zA-Z0-0]+$/.test(trimmed)) {
+    return true;
+  }
+
+  // Keyboard smashes / repeating consecutive characters (e.g., "asdfgh", "aaaaa")
+  if (/(.)\1{3,}/.test(trimmed)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Gemini Cognitive Assistance Engine
  * 
  * WHAT IT DOES:
@@ -22,9 +41,9 @@ function cleanJsonResponse(text: string): string {
  * 
  * HOW IT WORKS:
  * 1. Sends the text to Gemini with a strict JSON system prompt.
- * 2. Asks for a Detailed Plain English elaboration (reduces syntactic fatigue while maintaining full context).
+ * 2. Asks for a Plain English translation (reduces syntactic fatigue).
  * 3. Identifies complex words (>3 syllables) and breaks them phonetically.
- * 4. Asks a friendly K-12 Socratic comprehension check question to encourage active recall.
+ * 4. Asks an age-appropriate K-12 Socratic check question for active recall.
  */
 export async function getCognitiveAssistance(
   paragraphText: string,
@@ -46,19 +65,19 @@ export async function getCognitiveAssistance(
   });
 
   const prompt = `
-You are a cognitive reading assistant for K-12 students with ADHD and dyslexia.
+You are a supportive, warm cognitive reading assistant for K-12 students with ADHD and dyslexia.
 Analyze the following paragraph and provide structural reading assistance in STRICT JSON format matching this structure:
 {
   "simplifiedText": "The paragraph rewritten in plain English. Do not shorten it too much; instead, elaborate the paragraph's core concepts in detail using simple, friendly, and non-fatiguing words (K-12 vocabulary) to ensure complete understanding. Stay faithful to the paragraph and do not introduce new facts.",
   "syllabifiedWords": [
     { "original": "complexWord", "syllables": "com-plex-word" }
   ],
-  "socraticQuestion": "A quick Socratic comprehension check question to verify retention."
+  "socraticQuestion": "A friendly, simple comprehension question."
 }
 
-Rules:
+Rules & Instruction Pacing:
 1. "syllabifiedWords": Select 2-4 words with high structural complexity (>3 syllables) and break them into phonetic syllables (e.g. "communication" -> "com-mu-ni-ca-tion").
-2. "socraticQuestion": Craft a friendly, simple check question tailored for K-12 readers (under 15 words) that can be answered in one short sentence.
+2. "socraticQuestion": Craft a direct, K-12 friendly check-in question. Keep it under 15 words and easy to answer in a short sentence or phrase. Avoid dense academic phrasing.
 3. DO NOT return markdown wrappers (no \`\`\`json). Return raw JSON only.
 
 Paragraph:
@@ -80,14 +99,13 @@ Paragraph:
 }
 
 /**
- * Socratic Answer Evaluator
+ * Socratic Answer Evaluator with Edge-Case Safeguards
  * 
  * WHAT IT DOES:
- * Evaluates the student's answer to the Socratic question and returns short, 
- * encouraging feedback. Handles edge cases (empty inputs, "idk", gibberish) gracefully.
- * 
- * CONSTRAINT:
- * Strictly limited to 2 sentences to prevent cognitive overload.
+ * Evaluates the student's answer to the Socratic question and handles:
+ * - Empty, single-symbol, or non-answers ("idk", ".", "no", "pass")
+ * - Gibberish / nonsense inputs ("asdfghjkl", "12345")
+ * - Valid student attempts with supportive, 2-sentence feedback.
  */
 export async function evaluateSocraticAnswer(
   originalText: string,
@@ -96,20 +114,28 @@ export async function evaluateSocraticAnswer(
   apiKey: string
 ): Promise<string> {
   if (!apiKey || apiKey.trim() === "") {
-    return "Great effort! Please read the paragraph again.";
+    return "Great effort! Keep reading closely.";
   }
 
-  // Edge Case 1: Pre-check for empty or punctuation-only inputs
-  const trimmedInput = studentAnswer.trim().toLowerCase();
-  if (!trimmedInput || trimmedInput === "." || trimmedInput === "?" || trimmedInput === "!") {
-    return "Give it a try! Please read the paragraph again to find the answer.";
+  const trimmed = studentAnswer.trim().toLowerCase();
+
+  // 🛡️ SAFEGUARD 1: Fast client-side fallback for empty or single punctuation
+  if (!trimmed || trimmed === "." || trimmed === "?" || trimmed === "!") {
+    return "Give it a quick try! Please read the paragraph again and share what you think.";
   }
 
-  // Edge Case 2: Pre-check for explicit "I don't know" responses
-  if (["idk", "i don't know", "dont know", "no idea", "pass"].includes(trimmedInput)) {
-    return "No worries at all! Please read the paragraph again to find a quick clue.";
+  // 🛡️ SAFEGUARD 2: Fast client-side fallback for direct non-answers ("idk", "no", "idk bro")
+  const nonAnswerTriggers = ["idk", "i dont know", "i don't know", "no", "pass", "nothing", "dunno"];
+  if (nonAnswerTriggers.includes(trimmed)) {
+    return "No worries at all, reading takes practice! Please read the paragraph again and look for key details.";
   }
 
+  // 🛡️ SAFEGUARD 3: Fast client-side fallback for keyboard noise or repeating gibberish
+  if (isLikelyGibberish(trimmed)) {
+    return "That looks a bit like random letters! Please read the paragraph again and type your best answer.";
+  }
+
+  // AI Evaluation for meaningful inputs
   const genAI = new GoogleGenerativeAI(apiKey.trim());
   const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
 
@@ -119,12 +145,15 @@ Original Text: "${originalText}"
 Socratic Question: "${question}"
 Student's Answer: "${studentAnswer}"
 
-Rules:
-1. Determine if the student's answer is correct, incorrect, incomplete, or gibberish based on the original text.
-2. If the student's answer is incorrect, wrong, incomplete, gibberish (e.g. "asdfgh"), or demonstrates a misunderstanding:
-   - Provide encouraging, supportive feedback explaining why or guiding them, AND
+Rules & Safeguards:
+1. IF THE STUDENT'S ANSWER IS NONSENSE, GIBBERISH, OR UNRELATED KEYBOARD TYPING:
+   - Politely invite them to refocus on the main idea.
    - EXPLICITLY state: "Please read the paragraph again."
-3. If the student's answer is correct, provide warm feedback validating their understanding.
+2. IF THE ANSWER IS INCORRECT, WRONG, OR INCOMPLETE:
+   - Provide encouraging, supportive feedback explaining why they missed the mark without scolding them.
+   - EXPLICITLY state: "Please read the paragraph again."
+3. IF THE ANSWER IS CORRECT OR SHOWS GOOD UNDERSTANDING:
+   - Provide warm, positive feedback validating their comprehension.
 4. CRITICAL CONSTRAINT: Your entire response MUST BE EXACTLY 2 SENTENCES long. No more, no less.
 `;
 
