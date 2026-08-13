@@ -1,7 +1,7 @@
 // 1. Represents a word split into syllables for dyslexia support
 export interface SyllableWord {
-  original: string;   // e.g., "communication"
-  syllables: string;  // e.g., "com-mu-ni-ca-tion"
+  original: string; // e.g., "communication"
+  syllables: string; // e.g., "com-mu-ni-ca-tion"
 }
 
 // 2. The exact JSON payload structure Gemini must return to us
@@ -22,4 +22,5 @@ export interface ReaderConfig {
   rulerColor: string;     // color overlay (rgba)
   rulerHeight: number;    // vertical thickness in px
   apiKey?: string;        // Gemini API Key stored in config
+  theme?: 'light' | 'dark' | 'sepia';  // active reading color theme
 }
