@@ -118,9 +118,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-slate-100 text-slate-900 transition-colors duration-300 dark:from-slate-950 dark:via-indigo-950/20 dark:to-slate-900 dark:text-slate-50 flex flex-col font-sans">
       {/* Top Header */}
-      <header className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between shadow-sm">
+      <header className="px-6 py-4 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl sticky top-0 z-40 flex items-center justify-between shadow-lg shadow-slate-950/5 dark:shadow-slate-950/40">
         <div className="flex items-center gap-3">
           <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-md shadow-indigo-500/20">
             <BookOpen className="w-5 h-5" />

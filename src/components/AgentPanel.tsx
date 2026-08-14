@@ -176,7 +176,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
   // Render States
   if (!apiKey) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-slate-400 text-center p-6 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/10">
+      <div className="flex flex-col h-full bg-white/70 dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200/60 dark:border-slate-800/60 overflow-hidden shadow-lg shadow-slate-950/5 dark:shadow-slate-950/40">
         <AlertCircle className="w-12 h-12 text-slate-300 mb-3" />
         <h3 className="font-semibold text-slate-700 dark:text-slate-300 text-base mb-1">
           API Key Needed
@@ -216,7 +216,6 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-
         {loading && (
           <div className="space-y-4 animate-fadeIn">
             {/* Fake "Simplified Language" card skeleton */}
