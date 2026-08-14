@@ -96,7 +96,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium border-2 transition flex items-center justify-center gap-1.5 ${
                     config.theme === theme.value
                       ? "border-indigo-600 dark:border-indigo-400 shadow-sm"
-                      : "border-transparent bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                      : "border-transparent bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
                   }`}
                 >
                   <span
@@ -180,7 +180,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         className={`px-3 py-1 rounded-full text-xs font-medium border-2 transition text-slate-800 dark:text-slate-100 ${
                           config.rulerColor === color.value
                             ? "border-indigo-600 dark:border-indigo-400 shadow-sm"
-                            : "border-transparent bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                            : "border-transparent bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
                         }`}
                       >
                         <span
