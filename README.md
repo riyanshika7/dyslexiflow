@@ -1,6 +1,25 @@
 # DyslexiFlow Lite ⚡
 
-An intelligent, gaze-simulated adaptive reading companion designed for neurodivergent K-12 students (Dyslexia, ADHD, and visual cognitive processing differences). Built with React, TypeScript, Vite, and Google Gemini 1.5 Flash.
+An intelligent, gaze-simulated adaptive reading companion designed to alleviate cognitive fatigue, visual distraction, and decoding difficulties for neurodivergent K-12 students (Dyslexia, ADHD, and visual processing differences).
+
+Built with **React, TypeScript, Tailwind CSS, Web Speech API**, and powered by **Google Gemini 3.6 Flash**.
+
+---
+
+## 📌 The Problem & The Solution
+
+### The Challenge
+For students with dyslexia and ADHD, reading traditional text blocks can cause:
+* **Visual Crowding**: Words and letters appear to cluster or shift, causing line-skipping and reading fatigue.
+* **Decoding Hurdles**: Multisyllabic words are difficult to break down phonetically on the fly.
+* **Sensory Overload**: A full page of text creates visual density distractions.
+
+### The DyslexiFlow Solution
+DyslexiFlow Lite creates an interactive, distraction-free reading workspace:
+1. **Visual Scaffolding**: Dims and blurs inactive text to isolate the active paragraph, keeping visual focus locked.
+2. **Tactile Guide**: A hover-following, color-customizable reading ruler acts as a physical guide rail.
+3. **Auditory Reinforcement**: TTS narration reads simplified text at highly clear, slightly slower speeds (`0.9x`), and parses complex syllables phonetically (at `0.7x` speed).
+4. **Socratic AI Coaching**: Evaluates comprehension checks supportively, encouraging students to learn through feedback and guidance rather than static grades.
 
 ---
 
@@ -26,7 +45,7 @@ graph TD
     end
 
     subgraph Cognitive Assistant Swarm
-        I -->|Direct fetch request| K[Gemini 1.5 Flash API]
+        I -->|Direct fetch request| K[Gemini 3.6 Flash API]
         K -->|Returns structured JSON| L{JSON Payload}
         L -->|Syllabification| M[AgentPanel renders syllables]
         L -->|Text Simplification| N[AgentPanel renders simple English]
@@ -43,21 +62,23 @@ graph TD
 
 ---
 
-## ⚡ Core Features & Context
+## ⚡ Core Features
 
-1. **Active Paragraph Spotlight (Line Masking)**: Dimming non-focused text blocks prevents the ADHD/dyslexic brain from skipping lines and getting distracted by visual density.
-2. **Interactive Reading Ruler**: A translucent colored guideline that overlays text following the mouse, serving as a physical focus line to help scan paragraphs.
-3. **Struggle-Dwell Threshold**: If a reader is stuck on a paragraph, a background timer infers struggle, automatically triggering AI assistance.
-4. **Phonetic Decoding**: Splitting difficult vocabulary into colored syllables helps readers sound out words. Click-to-speak allows them to hear the correct phonetic enunciation slowly.
-5. **Encouraging Socratic Evaluation**: Instead of grading answers as right or wrong, the agent provides validating, positive commentary to build confidence.
+* **Active Paragraph Spotlight (Line Masking)**: Dimming non-focused text blocks prevents the ADHD/dyslexic brain from skipping lines and getting distracted by visual density.
+* **Interactive Reading Ruler**: A translucent colored guideline that overlays text following the mouse, serving as a physical focus line to help scan paragraphs.
+* **Struggle-Dwell Threshold**: If a reader is stuck on a paragraph, a background timer infers struggle, automatically triggering AI assistance.
+* **Phonetic Decoding**: Splits complex vocabulary into colored syllable badges. Click-to-speak allows students to hear the correct phonetic enunciation slowly.
+* **Encouraging Socratic Evaluation**: Instead of grading answers as right or wrong, the agent provides validating, positive commentary. If an answer is wrong, it kindly guides them and asks: *"Please read the paragraph again."*
+* **TTS Options**: Selectable speech triggers to read either the **Original** complex text or the **Simplified** plain-English explanation.
+* **Permanent Dark Mode**: Tailored for reduced eye strain and high readability contrast.
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+## 🛠️ Tech Stack
 
 * **Frontend Framework**: React 19 + TypeScript + Vite.
-* **Styling**: Tailwind CSS v4 (incorporating warm Sepia mode, High Contrast themes, and Dark mode).
-* **LLM Core**: Google Gemini 1.5 Flash (utilizing client-side Google Gen AI SDK for sub-second latency).
+* **Styling**: Tailwind CSS v4 (locked in a permanent, high-contrast dark theme).
+* **LLM Core**: Google Gemini 3.6 Flash (utilizing client-side Google Gen AI SDK for sub-second latency).
 * **Audio Engine**: Native Browser Web Speech Synthesis API (offline, zero-cost, zero latency).
 * **Data Persistence**: `localStorage` (safely stores API key, typography sizes, and ruler preferences).
 
@@ -92,5 +113,8 @@ npm run build
 
 ---
 
-## 🔒 Privacy & Safety Note
-This repository uses `.gitignore` to prevent committing sensitive configuration variables or API credentials. Do **never** commit `.env` files to public remote servers.
+## 👥 Hackathon Team Roles
+* **Lead AI Architect**: Configured Generative AI prompts, structured JSON schemas, and Socratic evaluation pipelines.
+* **UI Component Developer**: Programmed paragraph spotlight states, scroll height tracking, and the visual settings menu.
+* **UX/UI & Styling Lead**: Standardized accessibility fonts, Tailwind theme configurations, and glassmorphic designs.
+* **AI Integration & Audio Specialist**: Coded Speech Synthesis enunciation parameters, file readers, and coordinate controllers.
