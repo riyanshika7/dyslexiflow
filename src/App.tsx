@@ -207,7 +207,7 @@ export default function App() {
             >
               <ZoomOut className="w-3 h-3" />
             </button>
-            <span className="px-2 font-mono text-slate-500">{config.fontSize}px</span>
+            <span className="px-2 font-mono text-slate-500 dark:text-slate-300">{config.fontSize}px</span>
             <button
               onClick={() => updateConfigField('fontSize', Math.min(32, config.fontSize + 1))}
               className="p-1 border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition cursor-pointer"
@@ -221,7 +221,7 @@ export default function App() {
           <div className="flex items-center gap-4 border-l border-slate-200 dark:border-slate-800 pl-4">
             {/* Word Spacing */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Word Spacing:</span>
+              <span className="text-slate-500 dark:text-slate-300">Word Spacing:</span>
               <input
                 type="range"
                 min="0.08"
@@ -234,7 +234,7 @@ export default function App() {
             </div>
             {/* Letter Spacing */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Letter Spacing:</span>
+              <span className="text-slate-500 dark:text-slate-300">Letter Spacing:</span>
               <input
                 type="range"
                 min="0.02"
@@ -247,7 +247,7 @@ export default function App() {
             </div>
             {/* Line Height */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Line Height:</span>
+              <span className="text-slate-500 dark:text-slate-300">Line Height:</span>
               <input
                 type="range"
                 min="1.4"
@@ -261,10 +261,10 @@ export default function App() {
           </div>
         </div>
 
-        <div className="hidden lg:flex items-center gap-1 text-slate-400">
-          <Sparkles className="w-3 h-3 text-indigo-500" />
-          <span>Active masking dimming logic enabled</span>
-        </div>
+        <div className="hidden lg:flex items-center gap-1 text-slate-500 dark:text-slate-300">
+  <Sparkles className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+  <span>Active masking dimming logic enabled</span>
+</div>
       </section>
 
       {/* Main Workspace Layout */}
