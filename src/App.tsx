@@ -1,9 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, FileText, Upload, Sparkles, BookOpen, Plus, Type, ZoomIn, ZoomOut } from 'lucide-react';
-import { Reader } from './components/Reader';
-import { AgentPanel } from './components/AgentPanel';
-import { SettingsModal } from './components/SettingsModal';
-import type { ReaderConfig } from './types';
+import React, { useState, useEffect } from "react";
+import {
+  Settings,
+  FileText,
+  Upload,
+  Sparkles,
+  BookOpen,
+  Plus,
+  Type,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
+import { Reader } from "./components/Reader";
+import { AgentPanel } from "./components/AgentPanel";
+import { SettingsModal } from "./components/SettingsModal";
+import type { ReaderConfig } from "./types";
 
 // Sample texts for the demo
 const SAMPLES = {
@@ -29,19 +39,19 @@ const DEFAULT_CONFIG: ReaderConfig = {
   letterSpacing: 0.08,
   wordSpacing: 0.16,
   lineHeight: 1.8,
-  fontFamily: 'OpenDyslexic',
+  fontFamily: "OpenDyslexic",
   dwellTime: 4,
   rulerEnabled: true,
-  rulerColor: 'rgba(253, 224, 71, 1)',
+  rulerColor: "rgba(253, 224, 71, 1)",
   rulerHeight: 30,
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
-  theme: 'dark',
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY || "",
+  theme: "dark",
 };
 
 export default function App() {
   const [config, setConfig] = useState<ReaderConfig>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('dyslexi_flow_config');
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("dyslexi_flow_config");
       if (saved) {
         try {
           return { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
@@ -58,21 +68,21 @@ export default function App() {
   const [struggleText, setStruggleText] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const [customTextOpen, setCustomTextOpen] = useState<boolean>(false);
-  const [customTextInput, setCustomTextInput] = useState<string>('');
+  const [customTextInput, setCustomTextInput] = useState<string>("");
 
   // Persistent Cache: Save settings to localStorage whenever config updates
   useEffect(() => {
-    localStorage.setItem('dyslexi_flow_config', JSON.stringify(config));
+    localStorage.setItem("dyslexi_flow_config", JSON.stringify(config));
   }, [config]);
 
   // Apply the active theme class to the document root
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove('dark','sepia-mode');
-    if(config.theme==='dark'){
-      root.classList.add('dark');
-    }else if(config.theme === 'sepia'){
-      root.classList.add('sepia-mode')
+    root.classList.remove("dark", "sepia-mode");
+    if (config.theme === "dark") {
+      root.classList.add("dark");
+    } else if (config.theme === "sepia") {
+      root.classList.add("sepia-mode");
     }
     // 'light' theme = no class needed, it's the default Tailwind state
   }, [config.theme]);
@@ -85,7 +95,7 @@ export default function App() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const contents = event.target?.result;
-      if (typeof contents === 'string') {
+      if (typeof contents === "string") {
         setText(contents);
         resetReadingState();
       }
@@ -99,7 +109,7 @@ export default function App() {
       setText(customTextInput);
       resetReadingState();
       setCustomTextOpen(false);
-      setCustomTextInput('');
+      setCustomTextInput("");
     }
   };
 
@@ -108,7 +118,7 @@ export default function App() {
     setStruggleText(null);
   };
 
-  const loadSample = (type: 'space' | 'history' | 'biology') => {
+  const loadSample = (type: "space" | "history" | "biology") => {
     setText(SAMPLES[type]);
     resetReadingState();
   };
@@ -118,18 +128,23 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-slate-100 text-slate-900 transition-colors duration-300 dark:from-slate-950 dark:via-indigo-950/20 dark:to-slate-900 dark:text-slate-50 flex flex-col font-sans">
       {/* Top Header */}
-      <header className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between shadow-sm">
+      <header className="px-6 py-4 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl sticky top-0 z-40 flex items-center justify-between shadow-lg shadow-slate-950/5 dark:shadow-slate-950/40">
         <div className="flex items-center gap-3">
           <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-md shadow-indigo-500/20">
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
             <h1 className="text-lg font-extrabold tracking-tight text-slate-800 dark:text-slate-50 flex items-center gap-1.5">
-              DyslexiFlow <span className="text-xs bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-semibold px-2 py-0.5 rounded-full">Lite</span>
+              DyslexiFlow{" "}
+              <span className="text-xs bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-semibold px-2 py-0.5 rounded-full">
+                Lite
+              </span>
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Gaze-Simulated Assistive Reading Dashboard</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Gaze-Simulated Assistive Reading Dashboard
+            </p>
           </div>
         </div>
 
@@ -138,19 +153,19 @@ export default function App() {
           {/* Quick presets */}
           <div className="hidden md:flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200/50 dark:border-slate-800">
             <button
-              onClick={() => loadSample('space')}
+              onClick={() => loadSample("space")}
               className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
             >
               Astrophysics
             </button>
             <button
-              onClick={() => loadSample('history')}
+              onClick={() => loadSample("history")}
               className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
             >
               Industrial Revolution
             </button>
             <button
-              onClick={() => loadSample('biology')}
+              onClick={() => loadSample("biology")}
               className="px-2.5 py-1 text-xs font-semibold rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
             >
               Photosynthesis
@@ -164,9 +179,17 @@ export default function App() {
           </div>
 
           {/* Upload Button */}
-          <label className="cursor-pointer p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-300 transition" title="Upload Text File">
+          <label
+            className="cursor-pointer p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-300 transition"
+            title="Upload Text File"
+          >
             <Upload className="w-4 h-4" />
-            <input type="file" accept=".txt" onChange={handleFileUpload} className="hidden" />
+            <input
+              type="file"
+              accept=".txt"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
           </label>
 
           {/* Settings cog */}
@@ -188,7 +211,7 @@ export default function App() {
             <Type className="w-3.5 h-3.5 text-slate-400" />
             <select
               value={config.fontFamily}
-              onChange={(e) => updateConfigField('fontFamily', e.target.value)}
+              onChange={(e) => updateConfigField("fontFamily", e.target.value)}
               className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2 py-1 focus:outline-none dark:text-slate-100 font-semibold"
             >
               <option value="OpenDyslexic">OpenDyslexic</option>
@@ -201,15 +224,21 @@ export default function App() {
           {/* Font Size control */}
           <div className="flex items-center gap-1">
             <button
-              onClick={() => updateConfigField('fontSize', Math.max(14, config.fontSize - 1))}
+              onClick={() =>
+                updateConfigField("fontSize", Math.max(14, config.fontSize - 1))
+              }
               className="p-1 border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition cursor-pointer"
               title="Decrease Font Size"
             >
               <ZoomOut className="w-3 h-3" />
             </button>
-            <span className="px-2 font-mono text-slate-500">{config.fontSize}px</span>
+            <span className="px-2 font-mono text-slate-500 dark:text-slate-300">
+              {config.fontSize}px
+            </span>
             <button
-              onClick={() => updateConfigField('fontSize', Math.min(32, config.fontSize + 1))}
+              onClick={() =>
+                updateConfigField("fontSize", Math.min(32, config.fontSize + 1))
+              }
               className="p-1 border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 transition cursor-pointer"
               title="Increase Font Size"
             >
@@ -221,48 +250,60 @@ export default function App() {
           <div className="flex items-center gap-4 border-l border-slate-200 dark:border-slate-800 pl-4">
             {/* Word Spacing */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Word Spacing:</span>
+              <span className="text-slate-500 dark:text-slate-300">
+                Word Spacing:
+              </span>
               <input
                 type="range"
                 min="0.08"
                 max="0.4"
                 step="0.02"
                 value={config.wordSpacing}
-                onChange={(e) => updateConfigField('wordSpacing', parseFloat(e.target.value))}
+                onChange={(e) =>
+                  updateConfigField("wordSpacing", parseFloat(e.target.value))
+                }
                 className="w-16 accent-indigo-600"
               />
             </div>
             {/* Letter Spacing */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Letter Spacing:</span>
+              <span className="text-slate-500 dark:text-slate-300">
+                Letter Spacing:
+              </span>
               <input
                 type="range"
                 min="0.02"
                 max="0.2"
                 step="0.01"
                 value={config.letterSpacing}
-                onChange={(e) => updateConfigField('letterSpacing', parseFloat(e.target.value))}
+                onChange={(e) =>
+                  updateConfigField("letterSpacing", parseFloat(e.target.value))
+                }
                 className="w-16 accent-indigo-600"
               />
             </div>
             {/* Line Height */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Line Height:</span>
+              <span className="text-slate-500 dark:text-slate-300">
+                Line Height:
+              </span>
               <input
                 type="range"
                 min="1.4"
                 max="2.8"
                 step="0.1"
                 value={config.lineHeight}
-                onChange={(e) => updateConfigField('lineHeight', parseFloat(e.target.value))}
+                onChange={(e) =>
+                  updateConfigField("lineHeight", parseFloat(e.target.value))
+                }
                 className="w-16 accent-indigo-600"
               />
             </div>
           </div>
         </div>
 
-        <div className="hidden lg:flex items-center gap-1 text-slate-400">
-          <Sparkles className="w-3 h-3 text-indigo-500" />
+        <div className="hidden lg:flex items-center gap-1 text-slate-500 dark:text-slate-300">
+          <Sparkles className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
           <span>Active masking dimming logic enabled</span>
         </div>
       </section>
@@ -296,7 +337,7 @@ export default function App() {
           <AgentPanel
             activeParagraphText={activeText}
             struggleParagraphText={struggleText}
-            apiKey={config.apiKey || ''}
+            apiKey={config.apiKey || ""}
             dwellTime={config.dwellTime}
           />
         </section>
@@ -312,7 +353,9 @@ export default function App() {
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/10">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-indigo-500" />
-                <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">Paste Custom Reading Article</h2>
+                <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">
+                  Paste Custom Reading Article
+                </h2>
               </div>
             </div>
             <div className="p-6">

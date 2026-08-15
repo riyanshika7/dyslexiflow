@@ -15,6 +15,12 @@
   color: #4f3b25 !important;
 }
 
+/* Fix glass panels losing contrast in sepia mode */
+.sepia-mode .backdrop-blur-xl {
+  background-color: rgba(253, 246, 227, 0.85) !important;
+  border-color: rgba(230, 216, 179, 0.8) !important;
+}
+
 .sepia-mode .bg-white {
   background-color: #f5eccd !important;
 }

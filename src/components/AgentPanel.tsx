@@ -176,7 +176,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
   // Render States
   if (!apiKey) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-slate-400 text-center p-6 border border-dashed border-slate-300 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/10">
+      <div className="flex flex-col h-full bg-white/70 dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200/60 dark:border-slate-800/60 overflow-hidden shadow-lg shadow-slate-950/5 dark:shadow-slate-950/40">
         <AlertCircle className="w-12 h-12 text-slate-300 mb-3" />
         <h3 className="font-semibold text-slate-700 dark:text-slate-300 text-base mb-1">
           API Key Needed
@@ -216,7 +216,6 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-
         {loading && (
           <div className="space-y-4 animate-fadeIn">
             {/* Fake "Simplified Language" card skeleton */}
@@ -239,7 +238,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
               ))}
             </div>
 
-            <p className="text-center text-s text-slate-400 dark:text-slate-500">
+            <p className="text-center text-s text-slate-400 dark:text-slate-300">
               Analyzing paragraph and preparing reading aids...
             </p>
           </div>
@@ -274,7 +273,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                 Watching for reading struggles
               </p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 max-w-[220px] mx-auto">
+              <p className="text-xs text-slate-400 dark:text-slate-300 max-w-[220px] mx-auto">
                 Hold your cursor on a paragraph for{" "}
                 <span className="font-semibold text-indigo-500 dark:text-indigo-400">
                   {dwellTime || 4}s
@@ -290,7 +289,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
             {/* 1. Simplified Text Scaffolding */}
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm relative group">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-slate-400 dark:text-slate-300 uppercase tracking-wider">
                   Simplified Language
                 </span>
                 <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/60 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800/40">
@@ -340,7 +339,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
             {/* 2. Syllable Word Breakdowns */}
             {aiData.syllabifiedWords && aiData.syllabifiedWords.length > 0 && (
               <div className="space-y-2">
-                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                <span className="text-xs font-semibold text-slate-400 dark:text-slate-300 uppercase tracking-wider block">
                   Interactive Phonetic Guides
                 </span>
                 <div className="grid grid-cols-2 gap-2">
@@ -352,7 +351,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
                     >
                       <div className="absolute inset-0 bg-indigo-500/0 group-hover:bg-indigo-500/[0.03] dark:group-hover:bg-indigo-400/[0.05] transition-colors duration-150" />
                       <div className="relative">
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                        <p className="text-[11px] text-slate-400 dark:text-slate-300 font-medium">
                           {s.original}
                         </p>
                         <p className="font-semibold text-indigo-600 dark:text-indigo-400 tracking-wide text-sm mt-0.5">
@@ -371,7 +370,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({
             {/* 3. Socratic Comprehension Q&A */}
             <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm space-y-3">
               <div>
-                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
+                <span className="text-xs font-semibold text-slate-400 dark:text-slate-300 uppercase tracking-wider block mb-1">
                   Comprehension Check
                 </span>
                 <p className="text-slate-800 dark:text-slate-200 font-medium text-sm">
